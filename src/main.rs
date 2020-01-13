@@ -1,3 +1,6 @@
+mod commandline;
+
 fn main() {
-    println!("Hello, world!");
+    let content = commandline::run();
+    println!("{}", content);
 }
