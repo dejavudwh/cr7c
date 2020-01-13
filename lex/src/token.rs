@@ -49,7 +49,7 @@ pub enum Token {
     },
     Name {
         value: String,
-    }
+    },
 
     // separator
     LParentheses,
@@ -63,19 +63,19 @@ pub enum Token {
 }
 
 pub fn get_keyword() -> HashMap<String, Token> {
-    let map = HashMap::new();
+    let mut map = HashMap::new();
 
-    map.insert(String::from("while"), Token::While)
-    map.insert(String::from("for"), Token::For)
-    map.insert(String::from("if"), Token::If)
-    map.insert(String::from("else"), Token::Else)
-    map.insert(String::from("do"), Token::Do)
-    map.insert(String::from("break"), Token::Break)
-    map.insert(String::from("continue"), Token::Continue)
-    map.insert(String::from("return"), Token::Return)
-    map.insert(String::from("switch"), Token::Switch)
-    map.insert(String::from("case"), Token::Case)
-    map.insert(String::from("default"), Token::Default)
+    map.insert(String::from("while"), Token::While);
+    map.insert(String::from("for"), Token::For);
+    map.insert(String::from("if"), Token::If);
+    map.insert(String::from("else"), Token::Else);
+    map.insert(String::from("do"), Token::Do);
+    map.insert(String::from("break"), Token::Break);
+    map.insert(String::from("continue"), Token::Continue);
+    map.insert(String::from("return"), Token::Return);
+    map.insert(String::from("switch"), Token::Switch);
+    map.insert(String::from("case"), Token::Case);
+    map.insert(String::from("default"), Token::Default);
 
     map
 }
