@@ -34,7 +34,7 @@ pub enum Token {
     And,
     Bitand,
     Equal,
-    assgin,
+    Assgin,
     Pointer,
 
     // literal
@@ -62,7 +62,7 @@ pub enum Token {
     Semi,
 }
 
-pub fn get_keyword() -> HashMap<String, Token> {
+pub fn get_keywords() -> HashMap<String, Token> {
     let mut map = HashMap::new();
 
     map.insert(String::from("while"), Token::While);
