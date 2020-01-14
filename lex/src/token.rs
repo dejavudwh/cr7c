@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fmt;
 
+#[derive(Clone, Debug, PartialEq)]
 pub enum Token {
     // type
     Int,
@@ -34,6 +35,7 @@ pub enum Token {
     Bitor,
     And,
     Bitand,
+    Mul,
     Equal,
     Assgin,
     Pointer,
@@ -60,7 +62,10 @@ pub enum Token {
 pub fn get_keywords() -> HashMap<String, Token> {
     let mut map = HashMap::new();
 
-    map.insert(String::from("while"), Token::While);
+    map.insert(String::from("int"), Token::Int);
+    map.insert(String::from("float"), Token::Float);
+    map.insert(String::from("double"), Token::Double);
+    map.insert(String::from("char"), Token::Char);
     map.insert(String::from("for"), Token::For);
     map.insert(String::from("if"), Token::If);
     map.insert(String::from("else"), Token::Else);
@@ -71,6 +76,7 @@ pub fn get_keywords() -> HashMap<String, Token> {
     map.insert(String::from("switch"), Token::Switch);
     map.insert(String::from("case"), Token::Case);
     map.insert(String::from("default"), Token::Default);
+    map.insert(String::from("struct"), Token::Struct);
 
     map
 }
@@ -104,6 +110,7 @@ impl fmt::Display for Token {
             Token::Bitor => write!(f, "Token: <Bitor>"),
             Token::And => write!(f, "Token: <And>"),
             Token::Bitand => write!(f, "Token: <Bitand>"),
+            Token::Mul => write!(f, "Token: <Mul>"),
             Token::Equal => write!(f, "Token: <Equal>"),
             Token::Assgin => write!(f, "Token: <Assgin>"),
             Token::Pointer => write!(f, "Token: <Pointer>"),
