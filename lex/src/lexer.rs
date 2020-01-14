@@ -4,14 +4,13 @@ use crate::token:: {
 };
 use crate::location::Location;
 use std::collections::HashMap;
-use std::rc::Rc;
 
 pub struct Lexer {
     chars: Vec<char>,
     location: Location,
     read_pos: usize,
     cur_text: Vec<char>,
-    lookahead: Option<Token>,
+    lookahead: Vec<Token>,
     keywords: HashMap<String, Token>,
 }
 
@@ -27,12 +26,12 @@ impl Lexer {
             location: Location::new(0, 0),
             read_pos: 0,
             cur_text: Vec::new(),
-            lookahead: None,
+            lookahead: Vec::new(),
             keywords: get_keywords(),
         }
     }
 
-    pub fn lex(&mut self) -> Token {
+    fn lex(&mut self) -> Token {
         let start = self.read_pos;
         for index in start..self.chars.len() {
             let ch = self.chars[index];
@@ -57,6 +56,27 @@ impl Lexer {
 
         Token::Eof
     }
+
+    pub fn advance(&mut self) -> Token {
+        if self.lookahead.len() <= 0 {
+            self.lookahead(1);
+        }
+
+        return self.lookahead.remove(0)
+    }
+
+    pub fn lookahead(&mut self, number: usize) -> Token {
+        let len = self.lookahead.len();
+        if number >= len {
+            for i in len..number {
+                let t = self.lex();
+                self.lookahead.push(t);
+            } 
+        }
+        
+        return self.lookahead[number - 1].clone()
+    }
+
 
     fn whitespace_char(ch: char) -> bool {
         ch == ' ' || ch == '\n' || ch == '\r'
@@ -132,7 +152,6 @@ impl Lexer {
         let mut v = Vec::new();
         for index in self.read_pos..self.chars.len() {
             let ch = self.chars[index];
-            println!("di {}", ch);
             if ch.is_ascii_digit() {
                 v.push(ch);
             } else {
@@ -217,5 +236,33 @@ mod tests {
         assert!(Lexer::whitespace_char(' '));
         assert!(Lexer::whitespace_char('\n'));
         assert!(Lexer::whitespace_char('\r'));
+    }
+
+    #[test]
+    fn test_lexer() {
+        let content = String::from("int main() {
+            struct st {
+                int a;
+                double b;
+                float c;
+            }
+        
+            if (1 == 1) {
+                int a = 123425435;
+                char b = 'a';
+            }
+        
+            [ ] \"asd asd \" () && & -- ++ + -
+        }");
+
+        let mut lexer = Lexer::new(content);
+
+        println!("lookahead 4 {}", lexer.lookahead(4));
+        println!("lookahead 6 {}", lexer.lookahead(6));
+        println!("lookahead 8 {}", lexer.lookahead(8));
+
+        for i in 0..40 {
+            println!("{}", lexer.advance());
+        }
     }
 }

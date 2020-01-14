@@ -45,7 +45,7 @@ mod tests {
     #[test]
     fn test_streq() {
         let v1: Vec<char> = vec!['a', 'b', 'c'];
-        let v2: Vec<char> = vec!['a', 'b', 'v'];
+        let v2: Vec<char> = vec!['a', 'b', 'c'];
 
         let t1 = TokenStr::new(v1);
         let t2 = TokenStr::new(v2);
