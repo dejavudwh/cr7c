@@ -21,6 +21,7 @@ pub enum Token {
     Switch,
     Case,
     Default,
+    Import,
 
     Struct,
 
@@ -39,6 +40,7 @@ pub enum Token {
     Equal,
     Assgin,
     Pointer,
+    Dot,
 
     // literal
     Number(i64),
@@ -76,6 +78,8 @@ pub fn get_keywords() -> HashMap<String, Token> {
     map.insert(String::from("switch"), Token::Switch);
     map.insert(String::from("case"), Token::Case);
     map.insert(String::from("default"), Token::Default);
+    map.insert(String::from("import"), Token::Import);
+
     map.insert(String::from("struct"), Token::Struct);
 
     map
@@ -99,6 +103,7 @@ impl fmt::Display for Token {
             Token::Switch => write!(f, "Token: <Switch>"),
             Token::Case => write!(f, "Token: <Case>"),
             Token::Default => write!(f, "Token: <Default>"),
+            Token::Import => write!(f, "Token: <Import>"),
             Token::Struct => write!(f, "Token: <Struct>"),
             Token::Add => write!(f, "Token: <Add>"),
             Token::Sub => write!(f, "Token: <Sub>"),
@@ -107,6 +112,7 @@ impl fmt::Display for Token {
             Token::Inc => write!(f, "Token: <Inc>"),
             Token::Dec => write!(f, "Token: <Dec>"),
             Token::Or => write!(f, "Token: <Or>"),
+            Token::Dot => write!(f, "Token: <Dot>"),
             Token::Bitor => write!(f, "Token: <Bitor>"),
             Token::And => write!(f, "Token: <And>"),
             Token::Bitand => write!(f, "Token: <Bitand>"),

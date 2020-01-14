@@ -84,7 +84,7 @@ impl Lexer {
 
     fn can_be_identifier(&mut self) -> bool {
         let next_char = self.chars[self.read_pos];
-        return self.cur_text.len() > 0 && !next_char.is_ascii_alphabetic() && next_char != '_'
+        return self.cur_text.len() > 0 && !next_char.is_ascii_alphabetic() && next_char != '_' || next_char == '.'
     }
 
     fn handle_valid_char(&mut self, ch: char) -> Option<Token> {
@@ -100,6 +100,7 @@ impl Lexer {
             '/' => Some(Token::Div),
             '%' => Some(Token::Mod),
             '*' => Some(Token::Mul),
+            '.' => Some(Token::Dot),
             '+' => Some(self.add_or_inc_token()),
             '-' => Some(self.sub_or_dec_token()),
             '&' => Some(self.and_or_bitand_token()),
@@ -150,7 +151,7 @@ impl Lexer {
 
     fn number_token(&mut self) -> Token {
         let mut v = Vec::new();
-        for index in self.read_pos..self.chars.len() {
+        for index in self.read_pos - 1..self.chars.len() {
             let ch = self.chars[index];
             if ch.is_ascii_digit() {
                 v.push(ch);
@@ -248,7 +249,7 @@ mod tests {
             }
         
             if (1 == 1) {
-                int a = 123425435;
+                int a.v = 123425435;
                 char b = 'a';
             }
         
