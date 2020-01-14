@@ -43,7 +43,7 @@ pub enum Token {
     // literal
     Number(i64),
     String(String),
-    Character(u32),
+    Character(char),
     Name(String),
 
     // separator
