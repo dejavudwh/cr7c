@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt;
 
 pub enum Token {
     // type
@@ -38,18 +39,10 @@ pub enum Token {
     Pointer,
 
     // literal
-    Number {
-        value: f64
-    },
-    String {
-        value: String,
-    },
-    Character {
-        value: u32,
-    },
-    Name {
-        value: String,
-    },
+    Number(i64),
+    String(String),
+    Character(u32),
+    Name(String),
 
     // separator
     LParentheses,
@@ -60,6 +53,8 @@ pub enum Token {
     RBrackets,
     Quotes,
     Semi,
+
+    Eof,
 }
 
 pub fn get_keywords() -> HashMap<String, Token> {
@@ -78,4 +73,53 @@ pub fn get_keywords() -> HashMap<String, Token> {
     map.insert(String::from("default"), Token::Default);
 
     map
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Token::Int => write!(f, "Token: <Int>"),
+            Token::Float => write!(f, "Token: <Float>"),
+            Token::Double => write!(f, "Token: <Double>"),
+            Token::Char => write!(f, "Token: <Char>"),
+            Token::While => write!(f, "Token: <While>"),
+            Token::For => write!(f, "Token: <For>"),
+            Token::If => write!(f, "Token: <If>"),
+            Token::Else => write!(f, "Token: <Else>"),
+            Token::Do => write!(f, "Token: <Do>"),
+            Token::Break => write!(f, "Token: <Break>"),
+            Token::Continue => write!(f, "Token: <Continue>"),
+            Token::Return => write!(f, "Token: <Return>"),
+            Token::Switch => write!(f, "Token: <Switch>"),
+            Token::Case => write!(f, "Token: <Case>"),
+            Token::Default => write!(f, "Token: <Default>"),
+            Token::Struct => write!(f, "Token: <Struct>"),
+            Token::Add => write!(f, "Token: <Add>"),
+            Token::Sub => write!(f, "Token: <Sub>"),
+            Token::Div => write!(f, "Token: <Div>"),
+            Token::Mod => write!(f, "Token: <Mod>"),
+            Token::Inc => write!(f, "Token: <Inc>"),
+            Token::Dec => write!(f, "Token: <Dec>"),
+            Token::Or => write!(f, "Token: <Or>"),
+            Token::Bitor => write!(f, "Token: <Bitor>"),
+            Token::And => write!(f, "Token: <And>"),
+            Token::Bitand => write!(f, "Token: <Bitand>"),
+            Token::Equal => write!(f, "Token: <Equal>"),
+            Token::Assgin => write!(f, "Token: <Assgin>"),
+            Token::Pointer => write!(f, "Token: <Pointer>"),
+            Token::Number(i) => write!(f, "Token: <Number : {}>", i),
+            Token::String(s) => write!(f, "Token: <String : \"{}\">", s),
+            Token::Character(u) => write!(f, "Token: <Character : {}>", u),
+            Token::Name(s) => write!(f, "Token: <Name : {}>", s),
+            Token::LParentheses => write!(f, "Token: <LParentheses>"),
+            Token::RParentheses => write!(f, "Token: <RParentheses>"),
+            Token::LBrace => write!(f, "Token: <LBrace>"),
+            Token::RBrace => write!(f, "Token: <RBrace>"),
+            Token::LBrackets => write!(f, "Token: <LBrackets>"),
+            Token::RBrackets => write!(f, "Token: <RBrackets>"),
+            Token::Quotes => write!(f, "Token: <Quotes>"),
+            Token::Semi => write!(f, "Token: <Semi>"),
+            Token::Eof => write!(f, "Token: <Eof>"),
+        }
+    }
 }
