@@ -12,6 +12,8 @@ use crate::ast:: {
     TypeNode,
     TypeDef,
     TypeBase,
+    DefFuncNode,
+    ParamsNode,
 };
 
 pub fn parse(mut lexer: &mut Lexer) {
@@ -102,6 +104,9 @@ pub fn defstruct(mut lexer: &mut Lexer) -> DefStructNode {
 }
 
 fn slot(mut lexer: &mut Lexer) -> SlotNode {
+    /*
+        type name
+    */
     let typeref = typeref(&mut lexer);
     let name;
 
@@ -155,6 +160,9 @@ fn typeref(mut lexer: &mut Lexer) -> TypeNode {
 }
 
 fn typebase(mut lexer: &mut Lexer) -> TypeBase {
+    /*
+        int | float | double | struct xxx | char | void 
+    */
     let base;
     let mut name = None;
     let t = lexer.lookahead(1);
@@ -182,6 +190,54 @@ fn typebase(mut lexer: &mut Lexer) -> TypeBase {
 }
 
 
+fn deffunc(mut lexer: &mut Lexer) -> DefFuncNode {
+    /*
+        typeref name ( [ param ] ) block
+    */
+    let typeref = typeref(&mut lexer);
+    let name;
+
+    let t = lexer.lookahead(1);
+    match t {
+        Token::Name(s) => name = s,
+        _ => panic!("unexcept token! {}", t),
+    };
+
+    lexer.advance();
+
+    let params = params(&mut lexer);
+
+    DefFuncNode {
+        typeref,
+        name,
+        params,
+    }
+}
+
+fn params(mut lexer: &mut Lexer) -> ParamsNode {
+    lexer.matcher(Token::LParentheses);
+    let mut params: Vec<SlotNode> = Vec::new();
+    
+    loop {
+        if lexer.lookahead(1) != Token::RParentheses {
+            params.push(slot(&mut lexer));
+        }
+
+        let t = lexer.lookahead(1);
+        match t {
+            Token::RParentheses => break,
+            Token::Comma => lexer.advance(),
+            _ => panic!("unexcept token! {}", t),
+        };
+    }
+
+    lexer.matcher(Token::RParentheses);
+
+    ParamsNode {
+        params,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -202,5 +258,11 @@ mod tests {
             int[2] d;
         }"));
         println!("{:?}", defstruct(&mut lxr));
+    }
+
+    #[test]
+    fn test_deffunc() {
+        let mut lxr = Lexer::new(String::from("float test(int[] *a, struct na b)"));
+        println!("{:?}", deffunc(&mut lxr));
     }
 }

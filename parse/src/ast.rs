@@ -70,6 +70,30 @@ pub enum TypeDef {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TypeBase {
+    /*
+        int | float | double | struct xxx | char | void 
+    */
     pub base: Token,
     pub name: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct DefFuncNode {
+    /*
+        typeref name ( [ param ] ) block
+    */
+    pub typeref: TypeNode,
+    pub name: String,
+    pub params: ParamsNode,
+    // pub block: FuncBodyNode,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ParamsNode {
+    pub params: Vec<SlotNode>, 
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct FuncBodyNode {
+
 }
