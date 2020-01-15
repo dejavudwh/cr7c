@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Clone)]
 pub struct Location {
     pub row: usize,
     pub column: usize,

@@ -1,0 +1,18 @@
+DefStructNode { name: "st", 
+    member_list: 
+    [SlotNode 
+        { typeref: TypeNode 
+            { type_base: TypeBase 
+                { base: Int, name: None }, 
+          nested_def: [] }, 
+          name: "a" }, 
+        SlotNode { typeref: TypeNode 
+            { type_base: TypeBase 
+                { base: Double, name: None }, 
+                nested_def: [] }, 
+                name: "b" }, 
+        SlotNode { typeref: TypeNode 
+            { type_base: TypeBase 
+                { base: Float, name: None }, 
+                nested_def: [] }, 
+                name: "c" }] }

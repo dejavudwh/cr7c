@@ -6,8 +6,10 @@ edition = "2018"
 
 [workspace]
 members = [
-    "lex"
+    "lex",
+    "parse",
 ]
 
 [dependencies]
 lex = { path = "./lex" }
+parse = {path = "./parse"}

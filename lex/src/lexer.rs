@@ -4,6 +4,8 @@ use crate::token:: {
 };
 use crate::location::Location;
 use std::collections::HashMap;
+use std::process;
+use crate::error::LexicalError;
 
 pub struct Lexer {
     chars: Vec<char>,
@@ -62,6 +64,7 @@ impl Lexer {
             self.lookahead(1);
         }
 
+        println!("advance {}", self.lookahead(1));
         return self.lookahead.remove(0)
     }
 
@@ -77,6 +80,14 @@ impl Lexer {
         return self.lookahead[number - 1].clone()
     }
 
+    pub fn matcher(&mut self, token: Token) -> Token {
+        self.lookahead(1);
+        if self.lookahead[0] != token {
+            panic!("unexcept token!: {} in {}", self.lookahead[0], self.location);
+        };
+
+        self.advance()
+    }
 
     fn whitespace_char(ch: char) -> bool {
         ch == ' ' || ch == '\n' || ch == '\r'

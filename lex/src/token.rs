@@ -8,6 +8,9 @@ pub enum Token {
     Float,
     Double,
     Char,
+    Void,
+    Long,
+    Short,
 
     // keywords
     While,
@@ -68,6 +71,9 @@ pub fn get_keywords() -> HashMap<String, Token> {
     map.insert(String::from("float"), Token::Float);
     map.insert(String::from("double"), Token::Double);
     map.insert(String::from("char"), Token::Char);
+    map.insert(String::from("void"), Token::Void);
+    map.insert(String::from("long"), Token::Long);
+    map.insert(String::from("short"), Token::Short);
     map.insert(String::from("for"), Token::For);
     map.insert(String::from("if"), Token::If);
     map.insert(String::from("else"), Token::Else);
@@ -85,6 +91,17 @@ pub fn get_keywords() -> HashMap<String, Token> {
     map
 }
 
+pub fn is_base_type(token: &Token) -> bool {
+    *token == Token::Char   ||
+    *token == Token::Int    ||
+    *token == Token::Double ||
+    *token == Token::Float  ||
+    *token == Token::Long   ||
+    *token == Token::Short  ||
+    *token == Token::Void   ||
+    *token == Token::Struct
+}
+
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -92,6 +109,9 @@ impl fmt::Display for Token {
             Token::Float => write!(f, "Token: <Float>"),
             Token::Double => write!(f, "Token: <Double>"),
             Token::Char => write!(f, "Token: <Char>"),
+            Token::Long => write!(f, "Token: <Long>"),
+            Token::Short => write!(f, "Token: <Short>"),
+            Token::Void => write!(f, "Token: <Void>"),
             Token::While => write!(f, "Token: <While>"),
             Token::For => write!(f, "Token: <For>"),
             Token::If => write!(f, "Token: <If>"),
