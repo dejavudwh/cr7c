@@ -1,4 +1,5 @@
 use lex::token::Token;
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ProgramNode {
@@ -95,5 +96,16 @@ pub struct ParamsNode {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FuncBodyNode {
+
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct DefVarNode {
+    pub typeref: TypeNode,
+    pub name_map: HashMap<String, ExprNode>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprNode {
 
 }
