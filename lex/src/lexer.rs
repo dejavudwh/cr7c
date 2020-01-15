@@ -112,6 +112,7 @@ impl Lexer {
             '%' => Some(Token::Mod),
             '*' => Some(Token::Mul),
             '.' => Some(Token::Dot),
+            ',' => Some(Token::Comma),
             '+' => Some(self.add_or_inc_token()),
             '-' => Some(self.sub_or_dec_token()),
             '&' => Some(self.and_or_bitand_token()),
@@ -205,6 +206,8 @@ impl Lexer {
         if self.chars[self.read_pos] == '-' {
             self.read_pos += 1;
             return Token::Dec
+        } else if self.chars[self.read_pos] == '>' {
+            return Token::PointerRef
         } else {
             return Token::Sub
         }

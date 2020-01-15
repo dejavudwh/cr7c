@@ -14,8 +14,8 @@ use crate::ast:: {
     DefFuncNode,
     ParamsNode,
     DefVarNode,
-    ExprNode,
 };
+use std::collections::HashMap;
 
 pub fn import_stmts(mut lexer: &mut Lexer) -> Vec<ImportStmtNode> {
     // import_stmt *
@@ -105,7 +105,7 @@ fn slot(mut lexer: &mut Lexer) -> SlotNode {
     }
 }
 
-fn typeref(mut lexer: &mut Lexer) -> TypeNode {
+pub fn typeref(mut lexer: &mut Lexer) -> TypeNode {
     // TYPE_BASE ( [] | [ INTEGER ] | * | ( param_typeref ) ) *
     let type_base = typebase(&mut lexer);
     let mut nested_def = Vec::new();
@@ -196,6 +196,9 @@ fn deffunc(mut lexer: &mut Lexer) -> DefFuncNode {
 }
 
 fn params(mut lexer: &mut Lexer) -> ParamsNode {
+    /*
+        ( [ slot ( , slot) * ])
+    */
     lexer.matcher(Token::LParentheses);
     let mut params: Vec<SlotNode> = Vec::new();
     
@@ -232,9 +235,10 @@ fn params(mut lexer: &mut Lexer) -> ParamsNode {
 //             _ => panic!("unexcept token! {}", t),
 //         }
 //         lexer.advance();
-//         let expr = expr()
+//         // let expr = expr();
 //     }
 // }
+
 
 #[cfg(test)]
 mod tests {

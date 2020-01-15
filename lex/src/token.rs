@@ -43,6 +43,7 @@ pub enum Token {
     Equal,
     Assgin,
     Pointer,
+    PointerRef,
     Dot,
 
     // literal
@@ -60,6 +61,7 @@ pub enum Token {
     RBrackets,
     Quotes,
     Semi,
+    Comma,
 
     Eof,
 }
@@ -140,6 +142,7 @@ impl fmt::Display for Token {
             Token::Equal => write!(f, "Token: <Equal>"),
             Token::Assgin => write!(f, "Token: <Assgin>"),
             Token::Pointer => write!(f, "Token: <Pointer>"),
+            Token::PointerRef => write!(f, "Token: <PointerRef>"),
             Token::Number(i) => write!(f, "Token: <Number : {}>", i),
             Token::String(s) => write!(f, "Token: <String : \"{}\">", s),
             Token::Character(u) => write!(f, "Token: <Character : {}>", u),
@@ -152,6 +155,7 @@ impl fmt::Display for Token {
             Token::RBrackets => write!(f, "Token: <RBrackets>"),
             Token::Quotes => write!(f, "Token: <Quotes>"),
             Token::Semi => write!(f, "Token: <Semi>"),
+            Token::Comma => write!(f, "Token: <Comma>"),
             Token::Eof => write!(f, "Token: <Eof>"),
         }
     }
