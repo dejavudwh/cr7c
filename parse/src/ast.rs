@@ -2,6 +2,7 @@ use lex::token::Token;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::fmt;
+use std::io::Write;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ProgramNode {
@@ -130,56 +131,94 @@ pub struct TermNode {
     pub unary: Rc<Box<dyn UnaryNode>>,
 }
 
-impl fmt::Debug for dyn UnaryNode + 'static {
+impl fmt::Debug for dyn UnaryNode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{}", self.print())
     }
+}
+
+pub trait UnaryNode {
+    fn print(&self) -> String; 
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SingeUnaryNode {
-    prefix: Token,
-    primary: PrimaryNode,
-    postfix: Token,
+    pub prefix: Option<Token>,
+    pub primary: PrimaryNode,
 }
 
-impl UnaryNode for SingeUnaryNode {}
+impl UnaryNode for SingeUnaryNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(SingeUnaryNode {:?} {:?})", self.prefix, self.primary);
+
+        String::from_utf8(w).unwrap()
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ArrayUnaryNode {
-    prefix: Token,
+    prefix: Option<Token>,
     primary: PrimaryNode,
     postfix: ExprNode,
 }
 
-impl UnaryNode for ArrayUnaryNode {}
+impl UnaryNode for ArrayUnaryNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(ArrayUnaryNode {:?} {:?} {:?})", self.prefix, self.primary, self.postfix);
+
+        String::from_utf8(w).unwrap()
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RefUnaryNode {
-    pub prefix: Token,
+    pub prefix: Option<Token>,
     pub primary: PrimaryNode,
     pub name: Token,
 }
 
-impl UnaryNode for RefUnaryNode {}
+impl UnaryNode for RefUnaryNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(RefUnaryNode {:?} {:?} {:?})", self.prefix, self.primary, self.name);
+
+        String::from_utf8(w).unwrap()
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct PointerRefUnaryNode {
-    pub prefix: Token,
+    pub prefix: Option<Token>,
     pub primary: PrimaryNode,
     pub name: Token,
 }
 
-impl UnaryNode for PointerRefUnaryNode {}
+impl UnaryNode for PointerRefUnaryNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(PointerRefUnaryNode {:?} {:?} {:?})", self.prefix, self.primary, self.name);
+
+        String::from_utf8(w).unwrap()
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FuncCallNode {
-    pub prefix: Token,
+    pub prefix: Option<Token>,
     pub primary: PrimaryNode,
     pub param: Vec<ExprNode>,
 }
 
-impl UnaryNode for FuncCallNode {}
+impl UnaryNode for FuncCallNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(FuncCallNode {:?} {:?} {:?})", self.prefix, self.primary, self.param);
+
+        String::from_utf8(w).unwrap()
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct PrimaryNode {
@@ -187,7 +226,14 @@ pub struct PrimaryNode {
     pub value: Const,
 }
 
-impl UnaryNode for PrimaryNode {}
+impl UnaryNode for PrimaryNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "/(PrimaryNode {:?} {:?} )", self.name, self.value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Const {
@@ -195,8 +241,4 @@ pub enum Const {
     Char(char),
     String(String),
     Identifier,
-}
-
-pub trait UnaryNode {
-
 }

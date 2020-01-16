@@ -2,6 +2,8 @@ use lex::lexer::Lexer;
 use lex::token:: {
     Token,
     is_base_type,
+    is_prefix_op,
+    is_postfix_op,
 };
 use crate::parse_def::typeref;
 use crate::ast:: {
@@ -13,6 +15,7 @@ use crate::ast:: {
     RefUnaryNode,
     PointerRefUnaryNode,
     AssginmentNode,
+    SingeUnaryNode,
 };
 use std::rc::Rc;
 
@@ -61,9 +64,9 @@ fn expr9(mut lexer: &mut Lexer) {
 
 fn assignment_expr(mut lexer: &mut Lexer) -> AssginmentNode {
     let left_value = term(&mut lexer);
-    lexer.advance();
+    lexer.matcher(Token::Assgin);
     let right_value = term(&mut lexer);
-
+    
     AssginmentNode {
         left_value,
         right_value,
@@ -85,28 +88,42 @@ fn term(mut lexer: &mut Lexer) -> TermNode {
 }
 
 fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
-    let t = lexer.advance();
+    let mut t = None;
+    let la = lexer.lookahead(1);
+    if is_prefix_op(&la) {
+        lexer.advance();
+        t = Some(la);
+    }
 
     let pn = primary(&mut lexer);
 
-    match lexer.advance() {
-        Token::Dot => {
-            Box::new(RefUnaryNode {
-                prefix: t,
-                primary: pn,
-                name: lexer.advance(),
-            })
-        },
-        Token::PointerRef => {
-            Box::new(RefUnaryNode {
-                prefix: t,
-                primary: pn,
-                name: lexer.advance(),
-            })
-        },
-        _ => panic!("unexcept token!")
-        // TODO other type
+    println!("lookahead {} {}", lexer.lookahead(1), is_postfix_op(&lexer.lookahead(1)));
+    if is_postfix_op(&lexer.lookahead(1)) {
+        match lexer.advance() {
+            Token::Dot => {
+                println!("dot dot dot ");
+                return Box::new(RefUnaryNode {
+                    prefix: t,
+                    primary: pn,
+                    name: lexer.advance(),
+                })
+            },
+            Token::PointerRef => {
+                return Box::new(RefUnaryNode {
+                    prefix: t,
+                    primary: pn,
+                    name: lexer.advance(),
+                })
+            },
+            _ => panic!("unexcept token!")
+            // TODO other type
+        }
     }
+
+    Box::new(SingeUnaryNode {
+        prefix: t,
+        primary: pn,
+    })
 }
 
 fn primary(mut lexer: &mut Lexer) -> PrimaryNode {
@@ -140,7 +157,8 @@ mod tests {
 
     #[test]
     fn test_assginment_expr() {
-        let mut lxr = Lexer::new(String::from("a = 4 + 5"));
-        println!("{:?}", assignment_expr(&mut lxr));
+        let mut lxr = Lexer::new(String::from("a->a = 1"));
+        let node = assignment_expr(&mut lxr);
+        println!("{:?}", node);
     }
 }
