@@ -105,18 +105,23 @@ pub struct FuncBodyNode {
 
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct DefVarNode {
     /*
         typeref name [ = expr] [, name = [expr] ] *
     */
     pub typeref: TypeNode,
-    pub name_map: HashMap<String, ExprNode>,
+    pub name_map: HashMap<String, Rc<Box<dyn ExprNode>>>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct ExprNode {
+pub trait ExprNode {
+    fn print(&self) -> String; 
+}
 
+impl fmt::Debug for dyn ExprNode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.print())
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -125,20 +130,29 @@ pub struct AssginmentNode {
     pub right_value: TermNode,
 }
 
+impl ExprNode for AssginmentNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(AssginmentNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct TermNode {
     pub case_type: Option<TypeNode>,
     pub unary: Rc<Box<dyn UnaryNode>>,
 }
 
+pub trait UnaryNode {
+    fn print(&self) -> String; 
+}
+
 impl fmt::Debug for dyn UnaryNode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.print())
     }
-}
-
-pub trait UnaryNode {
-    fn print(&self) -> String; 
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -157,10 +171,26 @@ impl UnaryNode for SingeUnaryNode {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct SelfOpUnaryNode {
+    pub prefix: Option<Token>,
+    pub primary: PrimaryNode,
+    pub postfix: Token,
+}
+
+impl UnaryNode for SelfOpUnaryNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(SingeUnaryNode {:?} {:?} {:?})", self.prefix, self.primary, self.postfix);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct ArrayUnaryNode {
     prefix: Option<Token>,
     primary: PrimaryNode,
-    postfix: ExprNode,
+    postfix: Rc<Box<dyn ExprNode>>,
 }
 
 impl UnaryNode for ArrayUnaryNode {
@@ -172,43 +202,43 @@ impl UnaryNode for ArrayUnaryNode {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct RefUnaryNode {
     pub prefix: Option<Token>,
     pub primary: PrimaryNode,
-    pub name: Token,
+    pub postfix: Option<Rc<Box<dyn UnaryNode>>>,
 }
 
 impl UnaryNode for RefUnaryNode {
     fn print(&self) -> String {
         let mut w = Vec::new();
-        write!(&mut w, "(RefUnaryNode {:?} {:?} {:?})", self.prefix, self.primary, self.name);
+        write!(&mut w, "(RefUnaryNode {:?} {:?} {:?})", self.prefix, self.primary, self.postfix);
 
         String::from_utf8(w).unwrap()
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct PointerRefUnaryNode {
     pub prefix: Option<Token>,
     pub primary: PrimaryNode,
-    pub name: Token,
+    pub postfix: Option<Rc<Box<dyn UnaryNode>>>,
 }
 
 impl UnaryNode for PointerRefUnaryNode {
     fn print(&self) -> String {
         let mut w = Vec::new();
-        write!(&mut w, "(PointerRefUnaryNode {:?} {:?} {:?})", self.prefix, self.primary, self.name);
+        write!(&mut w, "(PointerRefUnaryNode {:?} {:?} {:?})", self.prefix, self.primary, self.postfix);
 
         String::from_utf8(w).unwrap()
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct FuncCallNode {
     pub prefix: Option<Token>,
     pub primary: PrimaryNode,
-    pub param: Vec<ExprNode>,
+    pub param: Vec<Rc<Box<dyn ExprNode>>>,
 }
 
 impl UnaryNode for FuncCallNode {
