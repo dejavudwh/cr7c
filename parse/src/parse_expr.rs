@@ -18,6 +18,8 @@ use crate::ast:: {
     AssginmentNode,
     SingeUnaryNode,
     SelfOpUnaryNode,
+    MultiplicationNode,
+    EofNode,
 };
 use std::rc::Rc;
 
@@ -58,24 +60,42 @@ fn expr8(mut lexer: &mut Lexer) {
 }
 
 fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
-    let value = term(&mut lexer);
-
-    match lexer.lookahead(1) {
+    let left_value = term(&mut lexer);
+    let t = lexer.lookahead(1);
+    println!("expr 9 ===== {}", t);
+    match t {
         Token::Assgin => {
             let right_value = assignment_expr(&mut lexer);
 
             return Box::new(AssginmentNode {
-                left_value: value,
-                right_value,
+                left_value,
+                right_value: Rc::new(right_value),
             })
         },
-        _ => panic!("u u uu  u u ")
+        Token::Mul => {
+            // let right_value = multiplication_expr(&mut lexer);
+
+            return Box::new(MultiplicationNode {
+                left_value,
+                right_value: Rc::new(expr9(&mut lexer)),
+            })
+        },
+        _ => {
+            return Box::new(left_value)
+        },
     } 
 }
 
-fn assignment_expr(mut lexer: &mut Lexer) -> TermNode {
+fn multiplication_expr(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+    lexer.matcher(Token::Mul);
+    let value = expr9(&mut lexer);
+
+    return value
+}
+
+fn assignment_expr(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     lexer.matcher(Token::Assgin);
-    let right_value = term(&mut lexer);
+    let right_value = expr9(&mut lexer);
 
     return right_value;
 }
@@ -186,7 +206,8 @@ mod tests {
 
     #[test]
     fn test_expr9() {
-        let mut lxr = Lexer::new(String::from("a->b.c.d = 1"));
+        // let mut lxr = Lexer::new(String::from("+a->b.c->d = 1"));
+        let mut lxr = Lexer::new(String::from("4 * 5 * 3"));
         let node = expr9(&mut lxr);
         println!("{:?}", node);
     }

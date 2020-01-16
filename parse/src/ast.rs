@@ -127,7 +127,7 @@ impl fmt::Debug for dyn ExprNode {
 #[derive(Clone, Debug)]
 pub struct AssginmentNode {
     pub left_value: TermNode,
-    pub right_value: TermNode,
+    pub right_value: Rc<Box<dyn ExprNode>>,
 }
 
 impl ExprNode for AssginmentNode {
@@ -140,9 +140,48 @@ impl ExprNode for AssginmentNode {
 }
 
 #[derive(Clone, Debug)]
+pub struct MultiplicationNode {
+    pub left_value: TermNode,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for MultiplicationNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(MultiplicationNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+
+#[derive(Clone, Debug)]
+pub struct EofNode {
+    
+}
+
+impl ExprNode for EofNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(Lead Node)");
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct TermNode {
     pub case_type: Option<TypeNode>,
     pub unary: Rc<Box<dyn UnaryNode>>,
+}
+
+impl ExprNode for TermNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(TermNode {:?} {:?} )", self.case_type, self.unary);
+
+        String::from_utf8(w).unwrap()
+    }
 }
 
 pub trait UnaryNode {
