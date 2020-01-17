@@ -20,6 +20,7 @@ use crate::ast:: {
     SelfOpUnaryNode,
     MultiplicationNode,
     EofNode,
+    DivisionNode,
 };
 use std::rc::Rc;
 
@@ -73,13 +74,19 @@ fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
             })
         },
         Token::Mul => {
-            // let right_value = multiplication_expr(&mut lexer);
-
+            lexer.advance();
             return Box::new(MultiplicationNode {
                 left_value,
                 right_value: Rc::new(expr9(&mut lexer)),
             })
         },
+        Token::Div => {
+            lexer.advance();
+            return Box::new(DivisionNode {
+                left_value,
+                right_value: Rc::new(expr9(&mut lexer)),
+            })
+        }
         _ => {
             return Box::new(left_value)
         },
@@ -207,7 +214,8 @@ mod tests {
     #[test]
     fn test_expr9() {
         // let mut lxr = Lexer::new(String::from("+a->b.c->d = 1"));
-        let mut lxr = Lexer::new(String::from("4 * 5 * 3"));
+        let mut lxr = Lexer::new(String::from("6 * 5 / 4 * 3 / 2"));
+        // let mut lxr = Lexer::new(String::from("6 * 5 * 4 * 3 * 2"));
         let node = expr9(&mut lxr);
         println!("{:?}", node);
     }

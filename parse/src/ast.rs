@@ -152,8 +152,22 @@ impl ExprNode for MultiplicationNode {
 
         String::from_utf8(w).unwrap()
     }
+} 
+
+#[derive(Clone, Debug)]
+pub struct DivisionNode {
+    pub left_value: TermNode,
+    pub right_value: Rc<Box<dyn ExprNode>>,
 }
 
+impl ExprNode for DivisionNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(DivisionNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct EofNode {
