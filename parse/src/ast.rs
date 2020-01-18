@@ -141,7 +141,7 @@ impl ExprNode for AssginmentNode {
 
 #[derive(Clone, Debug)]
 pub struct MultiplicationNode {
-    pub left_value: TermNode,
+    pub left_value: Rc<Box<dyn ExprNode>>,
     pub right_value: Rc<Box<dyn ExprNode>>,
 }
 

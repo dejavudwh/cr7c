@@ -74,11 +74,7 @@ fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
             })
         },
         Token::Mul => {
-            lexer.advance();
-            return Box::new(MultiplicationNode {
-                left_value,
-                right_value: Rc::new(expr9(&mut lexer)),
-            })
+            return multiplication_expr(&mut lexer, Box::new(left_value))
         },
         Token::Div => {
             lexer.advance();
@@ -93,11 +89,18 @@ fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     } 
 }
 
-fn multiplication_expr(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
-    lexer.matcher(Token::Mul);
-    let value = expr9(&mut lexer);
-
-    return value
+fn multiplication_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    if lexer.lookahead(1) == Token::Mul {
+        lexer.advance();
+        let t = term(&mut lexer);
+        let n = MultiplicationNode {
+            left_value: Rc::new(node),
+            right_value: Rc::new(Box::new(t)),
+        };
+        return multiplication_expr(&mut lexer, Box::new(n))
+    } else {
+        return node
+    }
 }
 
 fn assignment_expr(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
@@ -214,8 +217,8 @@ mod tests {
     #[test]
     fn test_expr9() {
         // let mut lxr = Lexer::new(String::from("+a->b.c->d = 1"));
-        let mut lxr = Lexer::new(String::from("6 * 5 / 4 * 3 / 2"));
-        // let mut lxr = Lexer::new(String::from("6 * 5 * 4 * 3 * 2"));
+        // let mut lxr = Lexer::new(String::from("6 * 5 / 4 * 3 / 2"));
+        let mut lxr = Lexer::new(String::from("6 * 5 * 4 * 3 * 2"));
         let node = expr9(&mut lxr);
         println!("{:?}", node);
     }
