@@ -185,14 +185,30 @@ impl ExprNode for ModNode {
 }
 
 #[derive(Clone, Debug)]
-pub struct EofNode {
-    
+pub struct AddNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
 }
 
-impl ExprNode for EofNode {
+impl ExprNode for AddNode {
     fn print(&self) -> String {
         let mut w = Vec::new();
-        write!(&mut w, "(Lead Node)");
+        write!(&mut w, "(AddNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct SubNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for SubNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(AddNode {:?} {:?} )", self.left_value, self.right_value);
 
         String::from_utf8(w).unwrap()
     }
