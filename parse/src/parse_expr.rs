@@ -21,6 +21,7 @@ use crate::ast:: {
     MultiplicationNode,
     EofNode,
     DivisionNode,
+    ModNode,
 };
 use std::rc::Rc;
 
@@ -77,11 +78,11 @@ fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
             return multiplication_expr(&mut lexer, Box::new(left_value))
         },
         Token::Div => {
-            lexer.advance();
-            return Box::new(DivisionNode {
-                left_value,
-                right_value: Rc::new(expr9(&mut lexer)),
-            })
+            return division_expr(&mut lexer, Box::new(left_value))
+
+        },
+        Token::Mod => {
+            return mod_expr(&mut lexer, Box::new(left_value))
         }
         _ => {
             return Box::new(left_value)
@@ -98,6 +99,34 @@ fn multiplication_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dy
             right_value: Rc::new(Box::new(t)),
         };
         return multiplication_expr(&mut lexer, Box::new(n))
+    } else {
+        return node
+    }
+}
+
+fn division_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    if lexer.lookahead(1) == Token::Div {
+        lexer.advance();
+        let t = term(&mut lexer);
+        let n = DivisionNode {
+            left_value: Rc::new(node),
+            right_value: Rc::new(Box::new(t)),
+        };
+        return division_expr(&mut lexer, Box::new(n))
+    } else {
+        return node
+    }
+}
+
+fn mod_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    if lexer.lookahead(1) == Token::Mod {
+        lexer.advance();
+        let t = term(&mut lexer);
+        let n = ModNode {
+            left_value: Rc::new(node),
+            right_value: Rc::new(Box::new(t)),
+        };
+        return mod_expr(&mut lexer, Box::new(n))
     } else {
         return node
     }
@@ -217,7 +246,7 @@ mod tests {
     #[test]
     fn test_expr9() {
         // let mut lxr = Lexer::new(String::from("+a->b.c->d = 1"));
-        // let mut lxr = Lexer::new(String::from("6 * 5 / 4 * 3 / 2"));
+        // let mut lxr = Lexer::new(String::from("6 * 5 % 4 * 3 / 2"));
         let mut lxr = Lexer::new(String::from("6 * 5 * 4 * 3 * 2"));
         let node = expr9(&mut lxr);
         println!("{:?}", node);
