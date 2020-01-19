@@ -62,32 +62,32 @@ fn expr8(mut lexer: &mut Lexer) {
 }
 
 fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
-    let left_value = term(&mut lexer);
-    let t = lexer.lookahead(1);
-    println!("expr 9 ===== {}", t);
-    match t {
-        Token::Assgin => {
-            let right_value = assignment_expr(&mut lexer);
-
-            return Box::new(AssginmentNode {
-                left_value,
-                right_value: Rc::new(right_value),
-            })
-        },
-        Token::Mul => {
-            return multiplication_expr(&mut lexer, Box::new(left_value))
-        },
-        Token::Div => {
-            return division_expr(&mut lexer, Box::new(left_value))
-
-        },
-        Token::Mod => {
-            return mod_expr(&mut lexer, Box::new(left_value))
-        }
-        _ => {
-            return Box::new(left_value)
-        },
-    } 
+    let mut left_value = term(&mut lexer);
+    loop {
+        let t = lexer.lookahead(1);
+        match t {
+            Token::Assgin => {
+                let right_value = assignment_expr(&mut lexer);
+    
+                return Box::new(AssginmentNode {
+                    left_value: Rc::new(left_value),
+                    right_value: Rc::new(right_value),
+                })
+            },
+            Token::Mul => {
+                left_value = multiplication_expr(&mut lexer, left_value)
+            },
+            Token::Div => {
+                left_value = division_expr(&mut lexer, left_value)
+            },
+            Token::Mod => {
+                left_value = mod_expr(&mut lexer, left_value)
+            }
+            _ => {
+                return left_value
+            },
+        } 
+    }
 }
 
 fn multiplication_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
@@ -96,7 +96,7 @@ fn multiplication_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dy
         let t = term(&mut lexer);
         let n = MultiplicationNode {
             left_value: Rc::new(node),
-            right_value: Rc::new(Box::new(t)),
+            right_value: Rc::new(t),
         };
         return multiplication_expr(&mut lexer, Box::new(n))
     } else {
@@ -110,7 +110,7 @@ fn division_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn Expr
         let t = term(&mut lexer);
         let n = DivisionNode {
             left_value: Rc::new(node),
-            right_value: Rc::new(Box::new(t)),
+            right_value: Rc::new(t),
         };
         return division_expr(&mut lexer, Box::new(n))
     } else {
@@ -124,7 +124,7 @@ fn mod_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode>
         let t = term(&mut lexer);
         let n = ModNode {
             left_value: Rc::new(node),
-            right_value: Rc::new(Box::new(t)),
+            right_value: Rc::new(t),
         };
         return mod_expr(&mut lexer, Box::new(n))
     } else {
@@ -139,7 +139,7 @@ fn assignment_expr(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     return right_value;
 }
 
-fn term(mut lexer: &mut Lexer) -> TermNode {
+fn term(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     let mut case_type = None;
     let node;
     if is_base_type(&lexer.lookahead(1)) {
@@ -147,10 +147,10 @@ fn term(mut lexer: &mut Lexer) -> TermNode {
     }
     node = Rc::new(unary(&mut lexer));
 
-    TermNode {
+    Box::new(TermNode {
         case_type,
         unary: node,
-    }
+    })
 }
 
 fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
@@ -246,8 +246,8 @@ mod tests {
     #[test]
     fn test_expr9() {
         // let mut lxr = Lexer::new(String::from("+a->b.c->d = 1"));
-        // let mut lxr = Lexer::new(String::from("6 * 5 % 4 * 3 / 2"));
-        let mut lxr = Lexer::new(String::from("6 * 5 * 4 * 3 * 2"));
+        let mut lxr = Lexer::new(String::from("6 * 5 % 4 * 3 / 2"));
+        // let mut lxr = Lexer::new(String::from("6 * 5 * 4 * 3 * 2"));
         let node = expr9(&mut lxr);
         println!("{:?}", node);
     }

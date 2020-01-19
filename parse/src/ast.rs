@@ -126,7 +126,7 @@ impl fmt::Debug for dyn ExprNode {
 
 #[derive(Clone, Debug)]
 pub struct AssginmentNode {
-    pub left_value: TermNode,
+    pub left_value: Rc<Box<dyn ExprNode>>,
     pub right_value: Rc<Box<dyn ExprNode>>,
 }
 
