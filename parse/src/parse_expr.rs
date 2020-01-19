@@ -58,15 +58,15 @@ fn expr7(mut lexer: &mut Lexer) {
 }
 
 fn expr8(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
-    let left_value = expr9(&mut lexer);
+    let mut left_value = expr9(&mut lexer);
     loop {
         let t = lexer.lookahead(1);
         match t {
             Token::Add => {
-                
+                left_value = add_expr(&mut lexer, left_value);
             },
             Token::Sub => {
-
+                left_value = sub_expr(&mut lexer, left_value);
             },
             _ => {
                 return left_value
@@ -76,17 +76,21 @@ fn expr8(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
 }
 
 fn add_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    if lexer.lookahead(1) == Token::Add {
-        lexer.advance();
-        let t = term(&mut lexer);
-        let n = AddNode {
-            left_value: Rc::new(node),
-            right_value: Rc::new(t),
-        };
-        return add_expr(&mut lexer, Box::new(n))
-    } else {
-        return node
-    }
+    lexer.advance();
+    let t = expr9(&mut lexer);
+    Box::new(AddNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn sub_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr9(&mut lexer);
+    Box::new(SubNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
 }
 
 fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
@@ -103,13 +107,13 @@ fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
                 })
             },
             Token::Mul => {
-                left_value = multiplication_expr(&mut lexer, left_value)
+                left_value = multiplication_expr(&mut lexer, left_value);
             },
             Token::Div => {
-                left_value = division_expr(&mut lexer, left_value)
+                left_value = division_expr(&mut lexer, left_value);
             },
             Token::Mod => {
-                left_value = mod_expr(&mut lexer, left_value)
+                left_value = mod_expr(&mut lexer, left_value);
             }
             _ => {
                 return left_value
@@ -260,8 +264,14 @@ mod tests {
     fn test_expr9() {
         // let mut lxr = Lexer::new(String::from("+a->b.c->d = 1"));
         let mut lxr = Lexer::new(String::from("6 * 5 % 4 * 3 * 2 / 1"));
-        // let mut lxr = Lexer::new(String::from("6 * 5 * 4 * 3 * 2"));
         let node = expr9(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_expr8() {
+        let mut lxr = Lexer::new(String::from("7 / 6 % 5 + 4 * 3 + 2 / 1"));
+        let node = expr8(&mut lxr);
         println!("{:?}", node);
     }
 }
