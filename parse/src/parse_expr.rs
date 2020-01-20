@@ -24,6 +24,7 @@ use crate::ast:: {
     SubNode,
     RightShiftNode,
     LeftShiftNode,
+    BitAndNode,
 };
 use std::rc::Rc;
 
@@ -51,15 +52,34 @@ fn expr5(mut lexer: &mut Lexer) {
     expr6(&mut lexer);
 }
 
-fn expr6(mut lexer: &mut Lexer) {
-    expr1(&mut lexer);
+fn expr6(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+    let mut left_value = expr7(&mut lexer);
+    loop {
+        let t = lexer.lookahead(1);
+        match t {
+            Token::Bitand => {
+                left_value = bit_and_expr(&mut lexer, left_value);
+            },
+            _ => {
+                return left_value
+            }
+        }
+    }
 }
 
+fn bit_and_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr7(&mut lexer);
+    Box::new(BitAndNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+    
 fn expr7(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     let mut left_value = expr8(&mut lexer);
     loop {
         let t = lexer.lookahead(1);
-        println!("loop times =====");
         match t {
             Token::Rightshift => {
                 left_value = right_shift_expr(&mut lexer, left_value);
@@ -86,7 +106,7 @@ fn right_shift_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn E
 fn left_shift_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
     lexer.advance();
     let t = expr8(&mut lexer);
-    Box::new(RightShiftNode {
+    Box::new(LeftShiftNode {
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -313,6 +333,13 @@ mod tests {
     fn test_expr7() {
         let mut lxr = Lexer::new(String::from("8 / 7 >> 6 % 5 + 4 * 3 + 2 / 1"));
         let node = expr7(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_expr6() {
+        let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 * 3 + 2 / 1"));
+        let node = expr6(&mut lxr);
         println!("{:?}", node);
     }
 }
