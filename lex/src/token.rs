@@ -41,7 +41,15 @@ pub enum Token {
     Bitand,
     Mul,
     Equal,
+    Greater,
+    Less,
+    Greaterequal,
+    Lessequal,
+    Rightshift,
+    Leftshift,
     Assgin,
+    Not,
+    Notequal,
     Pointer,
     PointerRef,
     Dot,
@@ -104,6 +112,25 @@ pub fn is_base_type(token: &Token) -> bool {
     *token == Token::Struct
 }
 
+pub fn is_prefix_op(token: &Token) -> bool {
+    *token == Token::Inc    ||
+    *token == Token::Dec    ||
+    *token == Token::Add    ||
+    *token == Token::Sub    ||
+    *token == Token::Mul    ||
+    *token == Token::Not    ||
+    *token == Token::Pointer
+}
+
+pub fn is_postfix_op(token: &Token) -> bool {
+    *token == Token::Inc          ||
+    *token == Token::Dec          ||
+    *token == Token::LBrackets    ||
+    *token == Token::Dot          ||
+    *token == Token::PointerRef   ||
+    *token == Token::LParentheses
+}
+
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -139,6 +166,15 @@ impl fmt::Display for Token {
             Token::And => write!(f, "Token: <And>"),
             Token::Bitand => write!(f, "Token: <Bitand>"),
             Token::Mul => write!(f, "Token: <Mul>"),
+            Token::Rightshift => write!(f, "Token: <Rightshift>"),
+            Token::Leftshift => write!(f, "Token: <Leftshift>"),
+            Token::Greater => write!(f, "Token: <Greater>"),
+            Token::Less => write!(f, "Token: <Less>"),
+            Token::Greater => write!(f, "Token: <Greater>"),
+            Token::Greaterequal => write!(f, "Token: <Greaterequal>"),
+            Token::Lessequal => write!(f, "Token: <Lessequal>"),
+            Token::Not => write!(f, "Token: <Not>"),
+            Token::Notequal => write!(f, "Token: <Notequal>"),
             Token::Equal => write!(f, "Token: <Equal>"),
             Token::Assgin => write!(f, "Token: <Assgin>"),
             Token::Pointer => write!(f, "Token: <Pointer>"),

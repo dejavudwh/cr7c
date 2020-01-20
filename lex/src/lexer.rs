@@ -70,14 +70,18 @@ impl Lexer {
 
     pub fn lookahead(&mut self, number: usize) -> Token {
         let len = self.lookahead.len();
-        if number >= len {
+        if number >= len && self.read_pos < self.chars.len() {
             for i in len..number {
                 let t = self.lex();
                 self.lookahead.push(t);
             } 
         }
         
-        return self.lookahead[number - 1].clone()
+        if self.lookahead.len() > 0 {
+            return self.lookahead[number - 1].clone()
+        } else {
+            return Token::Eof
+        }
     }
 
     pub fn matcher(&mut self, token: Token) -> Token {
@@ -113,6 +117,9 @@ impl Lexer {
             '*' => Some(Token::Mul),
             '.' => Some(Token::Dot),
             ',' => Some(Token::Comma),
+            '>' => Some(self.greater_or_shift()),
+            '<' => Some(self.less_or_shift()),
+            '!' => Some(self.not_or_equal()),
             '+' => Some(self.add_or_inc_token()),
             '-' => Some(self.sub_or_dec_token()),
             '&' => Some(self.and_or_bitand_token()),
@@ -193,6 +200,42 @@ impl Lexer {
         return num
     }
 
+    fn greater_or_shift(&mut self) -> Token {
+        let ch = self.chars[self.read_pos]; 
+        if ch == '>' {
+            self.read_pos += 1;
+            return Token::Rightshift
+        } else if ch == '=' {
+            self.read_pos += 1;
+            return Token::Greaterequal
+        } else {
+            return Token::Greater
+        }
+    }
+
+    fn less_or_shift(&mut self) -> Token {
+        let ch = self.chars[self.read_pos]; 
+        if ch == '<' {
+            self.read_pos += 1;
+            return Token::Leftshift
+        } else if ch == '=' {
+            self.read_pos += 1;
+            return Token::Lessequal
+        } else {
+            return Token::Less
+        }
+    }
+
+    fn not_or_equal(&mut self) -> Token {
+        let ch = self.chars[self.read_pos]; 
+        if ch == '=' {
+            self.read_pos += 1;
+            return Token::Notequal
+        } else {
+            return Token::Not
+        }
+    }
+
     fn add_or_inc_token(&mut self) -> Token {
         if self.chars[self.read_pos] == '+' {
             self.read_pos += 1;
@@ -207,6 +250,7 @@ impl Lexer {
             self.read_pos += 1;
             return Token::Dec
         } else if self.chars[self.read_pos] == '>' {
+            self.read_pos += 1;
             return Token::PointerRef
         } else {
             return Token::Sub
