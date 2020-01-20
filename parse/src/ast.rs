@@ -434,7 +434,7 @@ impl fmt::Debug for dyn UnaryNode {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct SingeUnaryNode {
     pub prefix: Option<Token>,
     pub primary: PrimaryNode,
@@ -449,7 +449,7 @@ impl UnaryNode for SingeUnaryNode {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct SelfOpUnaryNode {
     pub prefix: Option<Token>,
     pub primary: PrimaryNode,
@@ -529,7 +529,7 @@ impl UnaryNode for FuncCallNode {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct PrimaryNode {
     pub name: Option<String>,
     pub value: Const,
@@ -544,10 +544,11 @@ impl UnaryNode for PrimaryNode {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub enum Const {
     Integer(i64),
     Char(char),
     String(String),
     Identifier,
+    ParenthesesExpr(Rc<Box<dyn ExprNode>>),
 }

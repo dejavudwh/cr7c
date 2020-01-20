@@ -467,6 +467,14 @@ fn primary(mut lexer: &mut Lexer) -> PrimaryNode {
             name: Some(s),
             value: Const::Identifier,
         },
+        Token::LParentheses => {
+            let value = expr0(&mut lexer);
+            lexer.matcher(Token::RParentheses);
+            PrimaryNode {
+                name,
+                value: Const::ParenthesesExpr(Rc::new(value)),
+            }
+        },
         _ => panic!("unexcept token! {}", t)
     }
 }
@@ -542,7 +550,7 @@ mod tests {
 
     #[test]
     fn test_expr0() {
-        let mut lxr = Lexer::new(String::from("8 = 7 >> 6 & 4 || 3 ^ 2 && 1"));
+        let mut lxr = Lexer::new(String::from("8 = 7 >> 6 & (4 || 3) ^ 2 && 1"));
         let node = expr0(&mut lxr);
         println!("{:?}", node);
     }
