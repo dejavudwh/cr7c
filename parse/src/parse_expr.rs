@@ -27,6 +27,12 @@ use crate::ast:: {
     BitAndNode,
     BitXorNode,
     BitOrNode,
+    GreaterNode,
+    GreaterEqualNode,
+    LessNode,
+    LessEqualNode,
+    EqualNode,
+    NotEqualNode,
 };
 use std::rc::Rc;
 
@@ -42,8 +48,88 @@ fn expr2(mut lexer: &mut Lexer) {
     expr3(&mut lexer);
 }
 
-fn expr3(mut lexer: &mut Lexer) {
-    expr4(&mut lexer);
+fn expr3(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+    let mut left_value = expr4(&mut lexer);
+    loop {
+        let t = lexer.lookahead(1);
+        match t {
+            Token::Greater => {
+                left_value = greater_expr(&mut lexer, left_value);
+            },
+            Token::Greaterequal => {
+                left_value = greater_equal_expr(&mut lexer, left_value);
+            },
+            Token::Less => {
+                left_value = less_expr(&mut lexer, left_value);
+            },
+            Token::Lessequal => {
+                left_value = less_equal_expr(&mut lexer, left_value);
+            },
+            Token::Equal => {
+                left_value = equal_expr(&mut lexer, left_value);
+            },
+            Token::Notequal => {
+                left_value = not_equal_expr(&mut lexer, left_value);
+            },
+            _ => {
+                return left_value
+            }
+        }
+    }
+}
+
+fn greater_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr4(&mut lexer);
+    Box::new(GreaterNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn greater_equal_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr4(&mut lexer);
+    Box::new(GreaterEqualNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn less_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr4(&mut lexer);
+    Box::new(LessNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn less_equal_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr4(&mut lexer);
+    Box::new(LessEqualNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn equal_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr4(&mut lexer);
+    Box::new(EqualNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn not_equal_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr4(&mut lexer);
+    Box::new(NotEqualNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
 }
 
 fn expr4(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
@@ -396,6 +482,13 @@ mod tests {
     fn test_expr4() {
         let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 | 3 ^ 2 * 1"));
         let node = expr4(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_expr3() {
+        let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 >= 3 ^ 2 * 1"));
+        let node = expr3(&mut lxr);
         println!("{:?}", node);
     }
 }

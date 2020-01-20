@@ -290,6 +290,96 @@ impl ExprNode for BitOrNode {
 }
 
 #[derive(Clone, Debug)]
+pub struct GreaterNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for GreaterNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(GreaterNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct GreaterEqualNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for GreaterEqualNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(GreaterEqualNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct LessNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for LessNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(LessNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct LessEqualNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for LessEqualNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(LessEqualNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct EqualNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for EqualNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(EqualNODE {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct NotEqualNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for NotEqualNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(NotEqualNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct TermNode {
     pub case_type: Option<TypeNode>,
     pub unary: Rc<Box<dyn UnaryNode>>,
