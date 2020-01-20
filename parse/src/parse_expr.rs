@@ -22,6 +22,8 @@ use crate::ast:: {
     ModNode,
     AddNode,
     SubNode,
+    RightShiftNode,
+    LeftShiftNode,
 };
 use std::rc::Rc;
 
@@ -53,8 +55,41 @@ fn expr6(mut lexer: &mut Lexer) {
     expr1(&mut lexer);
 }
 
-fn expr7(mut lexer: &mut Lexer) {
-    expr1(&mut lexer);
+fn expr7(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+    let mut left_value = expr8(&mut lexer);
+    loop {
+        let t = lexer.lookahead(1);
+        println!("loop times =====");
+        match t {
+            Token::Rightshift => {
+                left_value = right_shift_expr(&mut lexer, left_value);
+            },
+            Token::Leftshift => {
+                left_value = left_shift_expr(&mut lexer, left_value);
+            },
+            _ => {
+                return left_value
+            }
+        }
+    }
+}
+
+fn right_shift_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr8(&mut lexer);
+    Box::new(RightShiftNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn left_shift_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr8(&mut lexer);
+    Box::new(RightShiftNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
 }
 
 fn expr8(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
@@ -180,7 +215,6 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
 
     let pn = primary(&mut lexer);
 
-    println!("lookahead {} {}", lexer.lookahead(1), is_postfix_op(&lexer.lookahead(1)));
     if is_postfix_op(&lexer.lookahead(1)) {
         match lexer.advance() {
             Token::Dot => {
@@ -272,6 +306,13 @@ mod tests {
     fn test_expr8() {
         let mut lxr = Lexer::new(String::from("7 / 6 % 5 + 4 * 3 + 2 / 1"));
         let node = expr8(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_expr7() {
+        let mut lxr = Lexer::new(String::from("8 / 7 >> 6 % 5 + 4 * 3 + 2 / 1"));
+        let node = expr7(&mut lxr);
         println!("{:?}", node);
     }
 }
