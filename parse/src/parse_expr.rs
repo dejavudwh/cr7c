@@ -25,6 +25,8 @@ use crate::ast:: {
     RightShiftNode,
     LeftShiftNode,
     BitAndNode,
+    BitXorNode,
+    BitOrNode,
 };
 use std::rc::Rc;
 
@@ -44,12 +46,52 @@ fn expr3(mut lexer: &mut Lexer) {
     expr4(&mut lexer);
 }
 
-fn expr4(mut lexer: &mut Lexer) {
-    expr5(&mut lexer);
+fn expr4(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+    let mut left_value = expr5(&mut lexer);
+    loop {
+        let t = lexer.lookahead(1);
+        match t {
+            Token::Bitor => {
+                left_value = bit_or_expr(&mut lexer, left_value);
+            },
+            _ => {
+                return left_value
+            }
+        }
+    }
 }
 
-fn expr5(mut lexer: &mut Lexer) {
-    expr6(&mut lexer);
+fn bit_or_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr5(&mut lexer);
+    Box::new(BitOrNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn expr5(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+    let mut left_value = expr6(&mut lexer);
+    loop {
+        let t = lexer.lookahead(1);
+        match t {
+            Token::Bitxor => {
+                left_value = bit_xor_expr(&mut lexer, left_value);
+            },
+            _ => {
+                return left_value
+            }
+        }
+    }
+}
+
+fn bit_xor_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr6(&mut lexer);
+    Box::new(BitXorNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
 }
 
 fn expr6(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
@@ -340,6 +382,20 @@ mod tests {
     fn test_expr6() {
         let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 * 3 + 2 / 1"));
         let node = expr6(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_expr5() {
+        let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 * 3 ^ 2 / 1"));
+        let node = expr5(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_expr4() {
+        let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 | 3 ^ 2 * 1"));
+        let node = expr4(&mut lxr);
         println!("{:?}", node);
     }
 }

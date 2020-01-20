@@ -260,6 +260,36 @@ impl ExprNode for BitAndNode {
 }
 
 #[derive(Clone, Debug)]
+pub struct BitXorNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for BitXorNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(BitXorNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BitOrNode {
+    pub left_value: Rc<Box<dyn ExprNode>>,
+    pub right_value: Rc<Box<dyn ExprNode>>,
+}
+
+impl ExprNode for BitOrNode {
+    fn print(&self) -> String {
+        let mut w = Vec::new();
+        write!(&mut w, "(BitOrNode {:?} {:?} )", self.left_value, self.right_value);
+
+        String::from_utf8(w).unwrap()
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct TermNode {
     pub case_type: Option<TypeNode>,
     pub unary: Rc<Box<dyn UnaryNode>>,
