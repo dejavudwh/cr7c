@@ -33,6 +33,8 @@ use crate::ast:: {
     LessEqualNode,
     EqualNode,
     NotEqualNode,
+    AndNode,
+    OrNode,
 };
 use std::rc::Rc;
 
@@ -40,12 +42,48 @@ fn expr0(mut lexer: &mut Lexer) {
     expr1(&mut lexer);
 }
 
-fn expr1(mut lexer: &mut Lexer) {
-    expr2(&mut lexer);
+fn expr1(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+    let mut left_value = expr2(&mut lexer);
+    loop {
+        let t = lexer.lookahead(1);
+        match t {
+            Token::Or => {
+                left_value = or_expr(&mut lexer, left_value);
+            },
+            _ => return left_value
+        }
+    }
 }
 
-fn expr2(mut lexer: &mut Lexer) {
-    expr3(&mut lexer);
+fn or_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr2(&mut lexer);
+    Box::new(OrNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
+}
+
+fn expr2(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+    let mut left_value = expr3(&mut lexer);
+    loop {
+        let t = lexer.lookahead(1);
+        match t {
+            Token::And => {
+                left_value = and_expr(&mut lexer, left_value);
+            },
+            _ => return left_value
+        }
+    }
+}
+
+fn and_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    lexer.advance();
+    let t = expr3(&mut lexer);
+    Box::new(AndNode {
+        left_value: Rc::new(node),
+        right_value: Rc::new(t),
+    })
 }
 
 fn expr3(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
@@ -489,6 +527,20 @@ mod tests {
     fn test_expr3() {
         let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 >= 3 ^ 2 * 1"));
         let node = expr3(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_expr2() {
+        let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 >= 3 ^ 2 && 1"));
+        let node = expr2(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_expr1() {
+        let mut lxr = Lexer::new(String::from("8 / 7 >> 6 & 4 || 3 ^ 2 && 1"));
+        let node = expr1(&mut lxr);
         println!("{:?}", node);
     }
 }
