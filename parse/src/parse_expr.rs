@@ -6,7 +6,7 @@ use lex::token:: {
     is_postfix_op,
 };
 use crate::parse_def::typeref;
-use crate::ast:: {
+use crate::ast_expr:: {
     UnaryNode,
     TermNode,
     PrimaryNode,
