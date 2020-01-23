@@ -15,7 +15,10 @@ use crate::ast:: {
     ParamsNode,
     DefVarNode,
 };
+use crate::parse_expr::expr0;
 use std::collections::HashMap;
+use std::rc::Rc;
+use crate::ast_expr::ExprNode;
 
 pub fn import_stmts(mut lexer: &mut Lexer) -> Vec<ImportStmtNode> {
     // import_stmt *
@@ -222,23 +225,53 @@ fn params(mut lexer: &mut Lexer) -> ParamsNode {
     }
 }
 
-// fn defvar(mut lexer: &Lexer) {
-//     let typeref = typeref(&mut lexer);
-//     let name_map = HashMap::new();
+fn defvar(mut lexer: &mut Lexer) -> DefVarNode {
+    /*
+        typeref name [ = expr] [, name = [expr] ] *
+    */
+    let typeref = typeref(&mut lexer);
+    let mut name_map = HashMap::new();
+    var_stmt(&mut lexer, &mut name_map);
 
-//     loop {
-//         let t = lexer.lookahead(1);
-//         let name;
-//         let expr;
-//         match t {
-//             Token::Name(s) => name = s,
-//             _ => panic!("unexcept token! {}", t),
-//         }
-//         lexer.advance();
-//         // let expr = expr();
-//     }
-// }
+    DefVarNode {
+        typeref,
+        name_map: name_map.clone(),
+    }
+}
 
+fn var_stmt(mut lexer: &mut Lexer, name_map: &mut HashMap<String, Option<Rc<Box<dyn ExprNode>>>>) {
+    let mut name = String::from("");
+    if let Token::Name(s) = lexer.lookahead(1) {
+        lexer.advance();
+        name = s;
+    } else {
+        panic!("unexcept token! {}", lexer.lookahead(1));
+    }
+    let t = lexer.lookahead(1);
+    match t {
+        Token::Assgin => {
+            lexer.advance();
+            name_map.insert(name, Some(Rc::new(expr0(&mut lexer))));
+
+            if lexer.lookahead(1) == Token::Comma {
+                lexer.advance();
+                var_stmt(&mut lexer, name_map);
+            }
+        },
+        Token::Comma => {
+            name_map.insert(name, None);
+            lexer.advance();
+            var_stmt(&mut lexer, name_map);
+        }
+        Token::Semi => {
+            name_map.insert(name, None);
+            lexer.advance();
+        },
+        _ => {
+            panic!("unexcpet token! {}", t);
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -266,5 +299,11 @@ mod tests {
     fn test_deffunc() {
         let mut lxr = Lexer::new(String::from("float test(int[] *a, struct na b)"));
         println!("{:?}", deffunc(&mut lxr));
+    }
+
+    #[test]
+    fn test_defvars() {
+        let mut lxr = Lexer::new(String::from("struct stu *[] a = a + 32, b = 234, c;"));
+        println!("{:?}", defvar(&mut lxr));
     }
 }

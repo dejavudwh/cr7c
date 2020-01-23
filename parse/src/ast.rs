@@ -26,16 +26,6 @@ pub struct TopDefNode {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct DefVarsNode {
-    /*
-        type name [ = expr] (, name [ = expr]) * ;
-     */
-    pub typeref: TypeNode,
-    pub name: Vec<String>,
-    pub expr: Vec<String>,
-}
-
-#[derive(Clone, Debug, PartialEq)]
 pub struct DefStructNode {
     /*
         STRUCT name member_list ;
@@ -107,8 +97,8 @@ pub struct FuncBodyNode {
 #[derive(Clone, Debug)]
 pub struct DefVarNode {
     /*
-        typeref name [ = expr] [, name = [expr] ] *
-    */
+        type name [ = expr] (, name [ = expr]) * ;
+     */
     pub typeref: TypeNode,
-    pub name_map: HashMap<String, Rc<Box<dyn ExprNode>>>,
+    pub name_map: HashMap<String, Option<Rc<Box<dyn ExprNode>>>>,
 }

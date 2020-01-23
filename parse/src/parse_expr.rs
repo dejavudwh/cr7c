@@ -39,7 +39,7 @@ use crate::ast_expr:: {
 };
 use std::rc::Rc;
 
-fn expr0(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
+pub fn expr0(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     let mut left_value = expr1(&mut lexer);
     loop {
         let t = lexer.lookahead(1);
