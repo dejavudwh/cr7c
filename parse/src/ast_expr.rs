@@ -248,7 +248,7 @@ pub struct EqualNode {
 impl ExprNode for EqualNode {
     fn print(&self) -> String {
         let mut w = Vec::new();
-        write!(&mut w, "{{ EqualNODE {:?} {:?} }}", self.left_value, self.right_value).unwrap();
+        write!(&mut w, "{{ EqualNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
 
         String::from_utf8(w).unwrap()
     }
