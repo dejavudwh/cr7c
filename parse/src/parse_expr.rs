@@ -406,7 +406,7 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
     let pn = primary(&mut lexer);
 
     if is_postfix_op(&lexer.lookahead(1)) {
-        match lexer.advance() {
+        match lexer.lookahead(1) {
             Token::Dot => {
                 return Box::new(RefUnaryNode {
                     prefix: t,
@@ -457,6 +457,7 @@ fn func_call_params_expr(mut lexer: &mut Lexer) -> Option<Vec<Rc<Box<dyn ExprNod
     if lexer.lookahead(1) == Token::RParentheses {
         return None
     } else {
+        lexer.advance();
         let mut params = Vec::new();
         params.push(Rc::new(expr0(&mut lexer)));
 
@@ -477,7 +478,6 @@ fn func_call_params_expr(mut lexer: &mut Lexer) -> Option<Vec<Rc<Box<dyn ExprNod
 
 fn primary(mut lexer: &mut Lexer) -> PrimaryNode {
     let t = lexer.advance();
-    println!("primary {}", t);
     let name = None;
     match t {
         Token::Number(i) => PrimaryNode {
@@ -579,7 +579,7 @@ mod tests {
 
     #[test]
     fn test_expr0() {
-        let mut lxr = Lexer::new(String::from("8 = 7 >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3)"));
+        let mut lxr = Lexer::new(String::from("a++ = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3)"));
         let node = expr0(&mut lxr);
         println!("{:?}", node);
     }

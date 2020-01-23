@@ -29,8 +29,9 @@ pub struct ExprStmtNode {
 impl StmtNode for ExprStmtNode {}
 
 #[derive(Debug)]
-pub struct NullStmtNode {
-
+pub struct WhileStmtNode {
+    pub condition: Box<dyn ExprNode>,
+    pub stmts: Box<dyn StmtNode>,
 }
 
-impl StmtNode for NullStmtNode {}
+impl StmtNode for WhileStmtNode {}

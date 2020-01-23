@@ -2,13 +2,13 @@ use lex::lexer::Lexer;
 use lex::token:: {
     Token,
     is_base_type,
-    is_stmt_token,
 };
 use crate::ast_stmt:: {
     StmtNode,
     IfStmtNode,
     ExprStmtNode,
     BlockNode,
+    WhileStmtNode,
 };
 use crate::parse_expr::expr0;
 use crate::parse_def::defvar;
@@ -18,12 +18,14 @@ fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
     let stmt: Box<dyn StmtNode>;
     match t {
         Token::LBrace => {
-            lexer.advance();
             stmt = block(&mut lexer);
         }
         Token::If => {
             stmt = if_stmt(&mut lexer);
         },
+        Token::While => {
+            stmt = while_stmt(&mut lexer);
+        }
         _ => {
             stmt = expr(&mut lexer);
         }
@@ -33,6 +35,8 @@ fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
 }
 
 fn block(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
+    lexer.advance();
+
     let mut defvars = Vec::new();
     let mut stmts = Vec::new();
     loop {
@@ -87,6 +91,20 @@ fn expr(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
     })
 }
 
+fn while_stmt(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
+    lexer.advance();
+
+    lexer.matcher(Token::LParentheses);
+    let condition = expr0(&mut lexer);
+    lexer.matcher(Token::RParentheses);
+    println!("while next token {}", lexer.lookahead(1));
+    let stmts = statement(&mut lexer);
+
+    Box::new(WhileStmtNode {
+        condition,
+        stmts,
+    })
+}
 
 #[cfg(test)]
 mod tests {
@@ -102,6 +120,13 @@ mod tests {
     #[test]
     fn test_block() {
         let mut lxr = Lexer::new(String::from("if(1 == 2) { int *[] a = 1; if (3 == 4) { a = 1; } } else { a = 6; }"));
+        let node = statement(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_while_stmt() {
+        let mut lxr = Lexer::new(String::from("if(1 == 2) { while(3 == 4) { a++; } } else { a = 6; }"));
         let node = statement(&mut lxr);
         println!("{:?}", node);
     }
