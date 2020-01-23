@@ -1,21 +1,26 @@
 use lex::lexer::Lexer;
-use lex::token::Token;
+use lex::token:: {
+    Token,
+    is_base_type,
+    is_stmt_token,
+};
 use crate::ast_stmt:: {
     StmtNode,
     IfStmtNode,
     ExprStmtNode,
-    NullStmtNode,
+    BlockNode,
 };
 use crate::parse_expr::expr0;
+use crate::parse_def::defvar;
 
 fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
-    if lexer.lookahead(1) == Token::LBrace {
-        lexer.advance();
-    }
-
     let t = lexer.lookahead(1);
     let stmt: Box<dyn StmtNode>;
     match t {
+        Token::LBrace => {
+            lexer.advance();
+            stmt = block(&mut lexer);
+        }
         Token::If => {
             stmt = if_stmt(&mut lexer);
         },
@@ -24,11 +29,31 @@ fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
         }
     }
 
-    if lexer.lookahead(1) == Token::RBrace {
-        lexer.advance();
+    return stmt
+}
+
+fn block(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
+    let mut defvars = Vec::new();
+    let mut stmts = Vec::new();
+    loop {
+        let t = lexer.lookahead(1);
+        println!("block token {}", t);
+        if t == Token::RBrace {
+            break;
+        } else if t == Token::Semi {
+            lexer.advance();
+        } else if is_base_type(&t) {
+            defvars.push(defvar(&mut lexer));
+        } else {
+            stmts.push(statement(&mut lexer));
+        }
     }
 
-    return stmt
+    
+    Box::new(BlockNode {
+        defvars,
+        stmts,
+    })
 }
 
 fn if_stmt(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
@@ -70,6 +95,13 @@ mod tests {
     #[test]
     fn test_if_stmt() {
         let mut lxr = Lexer::new(String::from("if(1 == 2) { a = 3 + 5; } else { a = 6; }"));
+        let node = statement(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_block() {
+        let mut lxr = Lexer::new(String::from("if(1 == 2) { int *[] a = 1; if (3 == 4) { a = 1; } } else { a = 6; }"));
         let node = statement(&mut lxr);
         println!("{:?}", node);
     }

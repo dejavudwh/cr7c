@@ -225,7 +225,7 @@ fn params(mut lexer: &mut Lexer) -> ParamsNode {
     }
 }
 
-fn defvar(mut lexer: &mut Lexer) -> DefVarNode {
+pub fn defvar(mut lexer: &mut Lexer) -> DefVarNode {
     /*
         typeref name [ = expr] [, name = [expr] ] *
     */

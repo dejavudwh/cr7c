@@ -1,8 +1,16 @@
 use crate::ast_expr::ExprNode;
+use crate::ast::DefVarNode;
 use std::fmt;
-use std::io::Write;
 
 pub trait StmtNode:fmt::Debug {}
+
+#[derive(Debug)]
+pub struct BlockNode {
+    pub defvars: Vec<DefVarNode>,
+    pub stmts: Vec<Box<dyn StmtNode>>,
+}
+
+impl StmtNode for BlockNode {}
 
 #[derive(Debug)]
 pub struct IfStmtNode {
