@@ -35,6 +35,7 @@ use crate::ast_expr:: {
     NotEqualNode,
     AndNode,
     OrNode,
+    FuncCallNode,
 };
 use std::rc::Rc;
 
@@ -433,6 +434,13 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
                     primary: pn,
                     postfix: lexer.advance(),
                 })
+            },
+            Token::LParentheses => {
+                return Box::new(FuncCallNode {
+                    prefix: t,
+                    primary: pn,
+                    params: func_call_params_expr(&mut lexer),
+                })
             }
             _ => panic!("unexcept token!")
             // TODO other type
@@ -445,6 +453,27 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
     })
 }
 
+fn func_call_params_expr(mut lexer: &mut Lexer) -> Option<Vec<Rc<Box<dyn ExprNode>>>> {
+    if lexer.lookahead(1) == Token::RParentheses {
+        return None
+    } else {
+        let mut params = Vec::new();
+        params.push(Rc::new(expr0(&mut lexer)));
+
+        loop {
+            if lexer.lookahead(1) != Token::Comma {
+                break;
+            }
+            lexer.advance();
+            params.push(Rc::new(expr0(&mut lexer)));
+        }
+        lexer.matcher(Token::RParentheses);
+
+        return Some(params)
+    }
+
+
+}
 
 fn primary(mut lexer: &mut Lexer) -> PrimaryNode {
     let t = lexer.advance();
@@ -550,7 +579,7 @@ mod tests {
 
     #[test]
     fn test_expr0() {
-        let mut lxr = Lexer::new(String::from("8 = 7 >> 6 & (4 || 3) ^ 2 && 1"));
+        let mut lxr = Lexer::new(String::from("8 = 7 >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3)"));
         let node = expr0(&mut lxr);
         println!("{:?}", node);
     }

@@ -117,9 +117,11 @@ impl Lexer {
             '*' => Some(Token::Mul),
             '.' => Some(Token::Dot),
             ',' => Some(Token::Comma),
-            '>' => Some(self.greater_or_shift()),
-            '<' => Some(self.less_or_shift()),
-            '!' => Some(self.not_or_equal()),
+            '^' => Some(Token::Bitxor),
+            '|' => Some(self.or_or_bitor_token()),
+            '>' => Some(self.greater_or_shift_token()),
+            '<' => Some(self.less_or_shift_token()),
+            '!' => Some(self.not_or_equal_token()),
             '+' => Some(self.add_or_inc_token()),
             '-' => Some(self.sub_or_dec_token()),
             '&' => Some(self.and_or_bitand_token()),
@@ -175,14 +177,16 @@ impl Lexer {
             if ch.is_ascii_digit() {
                 v.push(ch);
             } else {
-                if self.chars[index + 1].is_ascii_alphabetic() {
-                    panic!("Numeric constants unexpect token,");
-                } else {
-                    break
+                if index + 1 < self.chars.len() {
+                    if self.chars[index + 1].is_ascii_alphabetic() {
+                        panic!("Numeric constants unexpect token,");
+                    } else {
+                        break
+                    }
                 }
             }
         }
-        self.read_pos += v.len();
+        self.read_pos += v.len() - 1;
         let num = Lexer::digit_from_vec(v);
         return Token::Number(num as i64)
     }
@@ -200,7 +204,7 @@ impl Lexer {
         return num
     }
 
-    fn greater_or_shift(&mut self) -> Token {
+    fn greater_or_shift_token(&mut self) -> Token {
         let ch = self.chars[self.read_pos]; 
         if ch == '>' {
             self.read_pos += 1;
@@ -213,7 +217,7 @@ impl Lexer {
         }
     }
 
-    fn less_or_shift(&mut self) -> Token {
+    fn less_or_shift_token(&mut self) -> Token {
         let ch = self.chars[self.read_pos]; 
         if ch == '<' {
             self.read_pos += 1;
@@ -226,13 +230,23 @@ impl Lexer {
         }
     }
 
-    fn not_or_equal(&mut self) -> Token {
+    fn not_or_equal_token(&mut self) -> Token {
         let ch = self.chars[self.read_pos]; 
         if ch == '=' {
             self.read_pos += 1;
             return Token::Notequal
         } else {
             return Token::Not
+        }
+    }
+
+    fn or_or_bitor_token(&mut self) -> Token {
+        let ch = self.chars[self.read_pos]; 
+        if ch == '|' {
+            self.read_pos += 1;
+            return Token::Or
+        } else {
+            return Token::Bitor
         }
     }
 

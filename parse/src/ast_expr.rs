@@ -407,13 +407,13 @@ impl UnaryNode for PointerRefUnaryNode {
 pub struct FuncCallNode {
     pub prefix: Option<Token>,
     pub primary: PrimaryNode,
-    pub param: Vec<Rc<Box<dyn ExprNode>>>,
+    pub params: Option<Vec<Rc<Box<dyn ExprNode>>>>,
 }
 
 impl UnaryNode for FuncCallNode {
     fn print(&self) -> String {
         let mut w = Vec::new();
-        write!(&mut w, "{{ FuncCallNode {:?} {:?} {:?} }}", self.prefix, self.primary, self.param).unwrap();
+        write!(&mut w, "{{ FuncCallNode {:?} {:?} {:?} }}", self.prefix, self.primary, self.params).unwrap();
 
         String::from_utf8(w).unwrap()
     }
