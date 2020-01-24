@@ -19,6 +19,7 @@ use crate::parse_expr::expr0;
 use std::collections::HashMap;
 use std::rc::Rc;
 use crate::ast_expr::ExprNode;
+use crate::parse_stmt::block;
 
 pub fn import_stmts(mut lexer: &mut Lexer) -> Vec<ImportStmtNode> {
     // import_stmt *
@@ -190,11 +191,13 @@ fn deffunc(mut lexer: &mut Lexer) -> DefFuncNode {
     lexer.advance();
 
     let params = params(&mut lexer);
+    let block = block(&mut lexer);
 
     DefFuncNode {
         typeref,
         name,
         params,
+        block,
     }
 }
 
@@ -297,7 +300,7 @@ mod tests {
 
     #[test]
     fn test_deffunc() {
-        let mut lxr = Lexer::new(String::from("float test(int[] *a, struct na b)"));
+        let mut lxr = Lexer::new(String::from("float test(int[] *a, struct na b) { if(1 == 2) { for(a = 1; a < 3; a++) { b = 10 + 20; } } else { a = 6; return a; } }"));
         println!("{:?}", deffunc(&mut lxr));
     }
 

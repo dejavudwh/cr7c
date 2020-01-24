@@ -54,7 +54,7 @@ fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
     return stmt
 }
 
-fn block(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
+pub fn block(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
     lexer.advance();
 
     let mut defvars = Vec::new();

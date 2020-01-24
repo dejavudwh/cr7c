@@ -2,6 +2,7 @@ use lex::token::Token;
 use std::collections::HashMap;
 use std::rc::Rc;
 use crate::ast_expr::ExprNode;
+use crate::ast_stmt::StmtNode;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ProgramNode {
@@ -70,7 +71,7 @@ pub struct TypeBase {
     pub name: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug)]
 pub struct DefFuncNode {
     /*
         typeref name ( [ param ] ) block
@@ -78,7 +79,7 @@ pub struct DefFuncNode {
     pub typeref: TypeNode,
     pub name: String,
     pub params: ParamsNode,
-    // pub block: FuncBodyNode,
+    pub block: Box<StmtNode>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
