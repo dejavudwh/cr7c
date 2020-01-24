@@ -54,3 +54,21 @@ pub struct ForStmtNode {
 
 impl StmtNode for ForStmtNode {}
 
+#[derive(Debug)]
+pub struct ReturnStmtNode {
+    pub value: Box<dyn ExprNode>,
+}
+
+impl StmtNode for ReturnStmtNode {}
+
+#[derive(Debug)]
+pub struct BreakStmtNode {
+}
+
+impl StmtNode for BreakStmtNode {}
+
+#[derive(Debug)]
+pub struct ContinueStmtNode {
+}
+
+impl StmtNode for ContinueStmtNode {}
