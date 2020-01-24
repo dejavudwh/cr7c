@@ -10,6 +10,7 @@ use crate::ast_stmt:: {
     BlockNode,
     WhileStmtNode,
     DoWhileStmtNode,
+    ForStmtNode,
 };
 use crate::parse_expr::expr0;
 use crate::parse_def::defvar;
@@ -29,6 +30,9 @@ fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
         },
         Token::Do => {
             stmt = do_while_stmt(&mut lexer);
+        },
+        Token::For => {
+            stmt = for_stmt(&mut lexer);
         }
         _ => {
             stmt = expr(&mut lexer);
@@ -39,14 +43,12 @@ fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
 }
 
 fn block(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
-    println!(" come block  =====");
     lexer.advance();
 
     let mut defvars = Vec::new();
     let mut stmts = Vec::new();
     loop {
         let t = lexer.lookahead(1);
-        println!("block token {}", t);
         if t == Token::RBrace {
             lexer.advance();
             break;
@@ -126,6 +128,26 @@ fn do_while_stmt(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
     })
 }
 
+fn for_stmt(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
+    lexer.advance();
+
+    lexer.matcher(Token::LParentheses);
+    let initial_expr = expr0(&mut lexer);
+    lexer.matcher(Token::Semi);
+    let condition = expr0(&mut lexer);
+    lexer.matcher(Token::Semi);
+    let end_expr = expr0(&mut lexer);
+    lexer.matcher(Token::RParentheses);
+    let stmts = statement(&mut lexer);
+
+    Box::new(ForStmtNode {
+        initial_expr,
+        condition,
+        end_expr,
+        stmts,
+    })
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -155,6 +177,13 @@ mod tests {
     #[test]
     fn test_do_while_stmt() {
         let mut lxr = Lexer::new(String::from("if(1 == 2) { do { a = 1 + 2; } while(a < 3) } else { a = 6; }"));
+        let node = statement(&mut lxr);
+        println!("{:?}", node);
+    }
+
+    #[test]
+    fn test_for_stmt() {
+        let mut lxr = Lexer::new(String::from("if(1 == 2) { for(a = 1; a < 3; a++) { b = 10 + 20; } } else { a = 6; }"));
         let node = statement(&mut lxr);
         println!("{:?}", node);
     }

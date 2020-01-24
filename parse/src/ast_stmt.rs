@@ -43,3 +43,14 @@ pub struct DoWhileStmtNode {
 }
 
 impl StmtNode for DoWhileStmtNode {}
+
+#[derive(Debug)]
+pub struct ForStmtNode {
+    pub initial_expr: Box<dyn ExprNode>,
+    pub condition: Box<dyn ExprNode>,
+    pub end_expr: Box<dyn ExprNode>,
+    pub stmts: Box<dyn StmtNode>,
+}
+
+impl StmtNode for ForStmtNode {}
+
