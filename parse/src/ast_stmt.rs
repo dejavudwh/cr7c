@@ -35,3 +35,11 @@ pub struct WhileStmtNode {
 }
 
 impl StmtNode for WhileStmtNode {}
+
+#[derive(Debug)]
+pub struct DoWhileStmtNode {
+    pub condition: Box<dyn ExprNode>,
+    pub stmts: Box<dyn StmtNode>,
+}
+
+impl StmtNode for DoWhileStmtNode {}
