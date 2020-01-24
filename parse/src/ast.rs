@@ -3,14 +3,15 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use crate::ast_expr::ExprNode;
 use crate::ast_stmt::StmtNode;
+use std::fmt;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug)]
 pub struct ProgramNode {
     /*
         import_stmts top_defs EOF
     */
     pub import_stmts: Vec<ImportStmtNode>,
-    pub defs: Vec<TopDefNode>,
+    pub defs: TopDefNode,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -21,9 +22,11 @@ pub struct ImportStmtNode {
     pub paths: Vec<String>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct TopDefNode {
+pub trait DefNode:fmt::Debug {}
 
+#[derive(Debug)]
+pub struct TopDefNode {
+    pub defs: Vec<Box<dyn DefNode>>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -35,6 +38,8 @@ pub struct DefStructNode {
     pub name: String,
     pub member_list: Vec<SlotNode>,
 }
+
+impl DefNode for DefStructNode {}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SlotNode {
@@ -79,8 +84,10 @@ pub struct DefFuncNode {
     pub typeref: TypeNode,
     pub name: String,
     pub params: ParamsNode,
-    pub block: Box<StmtNode>,
+    pub block: Box<dyn StmtNode>,
 }
+
+impl DefNode for DefFuncNode {}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ParamsNode {
@@ -88,11 +95,6 @@ pub struct ParamsNode {
         ( [ slot ( , slot) * ])
     */
     pub params: Vec<SlotNode>, 
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct FuncBodyNode {
-
 }
 
 #[derive(Clone, Debug)]
@@ -103,3 +105,5 @@ pub struct DefVarNode {
     pub typeref: TypeNode,
     pub name_map: HashMap<String, Option<Rc<Box<dyn ExprNode>>>>,
 }
+
+impl DefNode for DefVarNode {}

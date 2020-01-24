@@ -16,7 +16,10 @@ use crate::ast_stmt:: {
     ContinueStmtNode,
 };
 use crate::parse_expr::expr0;
-use crate::parse_def::defvar;
+use crate::parse_def:: {
+    defvar,
+    typeref,
+};
 
 fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
     let t = lexer.lookahead(1);
@@ -67,7 +70,8 @@ pub fn block(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
         } else if t == Token::Semi {
             lexer.advance();
         } else if is_base_type(&t) {
-            defvars.push(defvar(&mut lexer));
+            let typeref = typeref(&mut lexer);
+            defvars.push(defvar(&mut lexer, typeref));
         } else {
             stmts.push(statement(&mut lexer));
         }

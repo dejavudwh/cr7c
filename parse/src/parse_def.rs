@@ -14,6 +14,7 @@ use crate::ast:: {
     DefFuncNode,
     ParamsNode,
     DefVarNode,
+    DefNode,
 };
 use crate::parse_expr::expr0;
 use std::collections::HashMap;
@@ -56,8 +57,29 @@ fn import_stmt(mut lexer: &mut Lexer) -> ImportStmtNode {
     }
 }
 
-pub fn top_defs(mut lexer: &mut Lexer) -> Vec<TopDefNode> {
-    Vec::new()
+pub fn top_defs(mut lexer: &mut Lexer) -> TopDefNode {
+    let mut defs: Vec<Box<dyn DefNode>> = Vec::new();
+
+    loop {
+        let t = lexer.lookahead(1);
+        println!(" ========== loop times {}", t);
+        if t == Token::Struct {
+            defs.push(Box::new(defstruct(&mut lexer)));
+        } else if is_base_type(&t) {
+            let typeref = typeref(&mut lexer);
+            if lexer.lookahead(2) == Token::LParentheses {
+                defs.push(Box::new(deffunc(&mut lexer, typeref)));
+            } else {
+                defs.push(Box::new(defvar(&mut lexer, typeref)));
+            }
+        } else {
+            break;
+        }
+    }
+
+    TopDefNode {
+        defs,
+    }
 }
 
 pub fn defstruct(mut lexer: &mut Lexer) -> DefStructNode {
@@ -175,11 +197,11 @@ fn typebase(mut lexer: &mut Lexer) -> TypeBase {
 }
 
 
-fn deffunc(mut lexer: &mut Lexer) -> DefFuncNode {
+fn deffunc(mut lexer: &mut Lexer, typeref: TypeNode) -> DefFuncNode {
     /*
         typeref name ( [ param ] ) block
     */
-    let typeref = typeref(&mut lexer);
+    // let typeref = typeref(&mut lexer);
     let name;
 
     let t = lexer.lookahead(1);
@@ -228,11 +250,11 @@ fn params(mut lexer: &mut Lexer) -> ParamsNode {
     }
 }
 
-pub fn defvar(mut lexer: &mut Lexer) -> DefVarNode {
+pub fn defvar(mut lexer: &mut Lexer, typeref: TypeNode) -> DefVarNode {
     /*
         typeref name [ = expr] [, name = [expr] ] *
     */
-    let typeref = typeref(&mut lexer);
+    // let typeref = typeref(&mut lexer);
     let mut name_map = HashMap::new();
     var_stmt(&mut lexer, &mut name_map);
 
@@ -268,12 +290,12 @@ fn var_stmt(mut lexer: &mut Lexer, name_map: &mut HashMap<String, Option<Rc<Box<
         }
         Token::Semi => {
             name_map.insert(name, None);
-            lexer.advance();
         },
         _ => {
             panic!("unexcpet token! {}", t);
         }
     }
+    lexer.matcher(Token::Semi);
 }
 
 #[cfg(test)]
@@ -301,12 +323,48 @@ mod tests {
     #[test]
     fn test_deffunc() {
         let mut lxr = Lexer::new(String::from("float test(int[] *a, struct na b) { if(1 == 2) { for(a = 1; a < 3; a++) { b = 10 + 20; } } else { a = 6; return a; } }"));
-        println!("{:?}", deffunc(&mut lxr));
+        // println!("{:?}", deffunc(&mut lxr));
     }
 
     #[test]
     fn test_defvars() {
         let mut lxr = Lexer::new(String::from("struct stu *[] a = a + 32, b = 234, c;"));
-        println!("{:?}", defvar(&mut lxr));
+        // println!("{:?}", defvar(&mut lxr));
+    }
+
+    #[test]
+    fn test_defs() {
+        let mut lxr = Lexer::new(String::from("
+            int abc = 1;
+            struct student {
+                char[] name;
+                int age;
+                int sex;
+            }
+
+            struct class {
+                struct student[] *ss;
+            }
+
+            int main(int argc,char **argv) {
+                int a = 1;
+                int i;
+                for(i = 0; i < 10; i++) {
+                    a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);
+                    if (a == 2) {
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
+
+                return 0;
+            }
+
+            int calc(int a) {
+                return a;
+            }
+        "));
+        println!("{:?}", top_defs(&mut lxr));
     }
 }
