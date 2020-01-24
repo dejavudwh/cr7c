@@ -22,18 +22,18 @@ use std::rc::Rc;
 use crate::ast_expr::ExprNode;
 use crate::parse_stmt::block;
 
-pub fn import_stmts(mut lexer: &mut Lexer) -> Vec<ImportStmtNode> {
+pub fn import_statements(mut lexer: &mut Lexer) -> Vec<ImportStmtNode> {
     // import_stmt *
     let mut nodes = Vec::new();
     while lexer.lookahead(1) == Token::Import {
         lexer.advance();
-        nodes.push(import_stmt(&mut lexer));
+        nodes.push(import_statement(&mut lexer));
     }
 
     return nodes
 }
 
-fn import_stmt(mut lexer: &mut Lexer) -> ImportStmtNode {
+fn import_statement(mut lexer: &mut Lexer) -> ImportStmtNode {
     // IMPORT NAME (. NAME)* 
     let mut paths = Vec::new();
     loop {
@@ -306,7 +306,7 @@ mod tests {
     fn test_import_stmt() {
         let mut lxr = Lexer::new(String::from("import a.b.c;
         import z.x.c;"));
-        println!("{:?}", import_stmts(&mut lxr));
+        println!("{:?}", import_statements(&mut lxr));
     }
 
     #[test]
