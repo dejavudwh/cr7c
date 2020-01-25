@@ -384,9 +384,14 @@ fn mod_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode>
 fn term(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     let mut case_type = None;
     let node;
-    if is_base_type(&lexer.lookahead(1)) {
-        case_type = Some(typeref(&mut lexer));
+    if lexer.lookahead(1) == Token::LParentheses {
+        if is_base_type(&lexer.lookahead(2)) {
+            lexer.advance();
+            case_type = Some(typeref(&mut lexer));
+            lexer.matcher(Token::RParentheses);
+        }
     }
+    
     node = Rc::new(unary(&mut lexer));
 
     Box::new(TermNode {
@@ -579,7 +584,7 @@ mod tests {
 
     #[test]
     fn test_expr0() {
-        let mut lxr = Lexer::new(String::from("a++ = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3)"));
+        let mut lxr = Lexer::new(String::from("(int *[]) a++ = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3)"));
         let node = expr0(&mut lxr);
         println!("{:?}", node);
     }

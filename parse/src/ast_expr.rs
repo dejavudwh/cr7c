@@ -4,14 +4,7 @@ use std::fmt;
 use std::io::Write;
 use crate::ast::TypeNode;
 
-pub trait ExprNode {
-    fn print(&self) -> String; 
-}
-
-impl fmt::Debug for dyn ExprNode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.print())
-    }
+pub trait ExprNode:fmt::Debug {
 }
 
 #[derive(Clone, Debug)]
@@ -21,12 +14,6 @@ pub struct AssginmentNode {
 }
 
 impl ExprNode for AssginmentNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ AssginmentNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -36,12 +23,6 @@ pub struct MultiplicationNode {
 }
 
 impl ExprNode for MultiplicationNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ MultiplicationNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 } 
 
 #[derive(Clone, Debug)]
@@ -51,12 +32,6 @@ pub struct DivisionNode {
 }
 
 impl ExprNode for DivisionNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ DivisionNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -66,12 +41,6 @@ pub struct ModNode {
 }
 
 impl ExprNode for ModNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ ModNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -81,12 +50,6 @@ pub struct AddNode {
 }
 
 impl ExprNode for AddNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ AddNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -96,12 +59,6 @@ pub struct SubNode {
 }
 
 impl ExprNode for SubNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ SubNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -111,12 +68,6 @@ pub struct RightShiftNode {
 }
 
 impl ExprNode for RightShiftNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ RightShiftNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -126,12 +77,6 @@ pub struct LeftShiftNode {
 }
 
 impl ExprNode for LeftShiftNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ LeftShiftNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -141,12 +86,6 @@ pub struct BitAndNode {
 }
 
 impl ExprNode for BitAndNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ BitAndNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -156,12 +95,6 @@ pub struct BitXorNode {
 }
 
 impl ExprNode for BitXorNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ BitXorNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -171,12 +104,6 @@ pub struct BitOrNode {
 }
 
 impl ExprNode for BitOrNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ BitOrNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -186,12 +113,6 @@ pub struct GreaterNode {
 }
 
 impl ExprNode for GreaterNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ GreaterNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -201,12 +122,6 @@ pub struct GreaterEqualNode {
 }
 
 impl ExprNode for GreaterEqualNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ GreaterEqualNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -216,12 +131,6 @@ pub struct LessNode {
 }
 
 impl ExprNode for LessNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ LessNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -231,12 +140,6 @@ pub struct LessEqualNode {
 }
 
 impl ExprNode for LessEqualNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ LessEqualNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -246,12 +149,6 @@ pub struct EqualNode {
 }
 
 impl ExprNode for EqualNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ EqualNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -261,12 +158,6 @@ pub struct NotEqualNode {
 }
 
 impl ExprNode for NotEqualNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ NotEqualNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -276,12 +167,6 @@ pub struct AndNode {
 }
 
 impl ExprNode for AndNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ AndNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -291,12 +176,6 @@ pub struct OrNode {
 }
 
 impl ExprNode for OrNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ OrNode {:?} {:?} }}", self.left_value, self.right_value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -306,22 +185,9 @@ pub struct TermNode {
 }
 
 impl ExprNode for TermNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ TermNode {:?} {:?} }}", self.case_type, self.unary).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
-pub trait UnaryNode {
-    fn print(&self) -> String; 
-}
-
-impl fmt::Debug for dyn UnaryNode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.print())
-    }
+pub trait UnaryNode:fmt::Debug {
 }
 
 #[derive(Clone, Debug)]
@@ -331,12 +197,6 @@ pub struct SingeUnaryNode {
 }
 
 impl UnaryNode for SingeUnaryNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ SingeUnaryNode {:?} {:?} }}", self.prefix, self.primary).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -347,12 +207,6 @@ pub struct SelfOpUnaryNode {
 }
 
 impl UnaryNode for SelfOpUnaryNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ SingeUnaryNode {:?} {:?} {:?} }}", self.prefix, self.primary, self.postfix).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -363,12 +217,6 @@ pub struct ArrayUnaryNode {
 }
 
 impl UnaryNode for ArrayUnaryNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ ArrayUnaryNode {:?} {:?} {:?} }}", self.prefix, self.primary, self.postfix).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -379,12 +227,6 @@ pub struct RefUnaryNode {
 }
 
 impl UnaryNode for RefUnaryNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ RefUnaryNode {:?} {:?} {:?} }}", self.prefix, self.primary, self.postfix).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -395,12 +237,6 @@ pub struct PointerRefUnaryNode {
 }
 
 impl UnaryNode for PointerRefUnaryNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ PointerRefUnaryNode {:?} {:?} {:?} }}", self.prefix, self.primary, self.postfix).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -411,12 +247,6 @@ pub struct FuncCallNode {
 }
 
 impl UnaryNode for FuncCallNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ FuncCallNode {:?} {:?} {:?} }}", self.prefix, self.primary, self.params).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -426,12 +256,6 @@ pub struct PrimaryNode {
 }
 
 impl UnaryNode for PrimaryNode {
-    fn print(&self) -> String {
-        let mut w = Vec::new();
-        write!(&mut w, "{{ PrimaryNode {:?} {:?} }}", self.name, self.value).unwrap();
-
-        String::from_utf8(w).unwrap()
-    }
 }
 
 #[derive(Clone, Debug)]
