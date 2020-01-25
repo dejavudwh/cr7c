@@ -1,7 +1,6 @@
 use lex::token::Token;
 use std::rc::Rc;
 use std::fmt;
-use std::io::Write;
 use crate::ast::TypeNode;
 
 pub trait ExprNode:fmt::Debug {
@@ -17,165 +16,13 @@ impl ExprNode for AssginmentNode {
 }
 
 #[derive(Clone, Debug)]
-pub struct MultiplicationNode {
+pub struct ArithmeticOpNode {
+    pub operator: Token,
     pub left_value: Rc<Box<dyn ExprNode>>,
     pub right_value: Rc<Box<dyn ExprNode>>,
 }
 
-impl ExprNode for MultiplicationNode {
-} 
-
-#[derive(Clone, Debug)]
-pub struct DivisionNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for DivisionNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct ModNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for ModNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct AddNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for AddNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct SubNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for SubNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct RightShiftNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for RightShiftNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct LeftShiftNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for LeftShiftNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct BitAndNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for BitAndNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct BitXorNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for BitXorNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct BitOrNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for BitOrNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct GreaterNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for GreaterNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct GreaterEqualNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for GreaterEqualNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct LessNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for LessNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct LessEqualNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for LessEqualNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct EqualNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for EqualNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct NotEqualNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for NotEqualNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct AndNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for AndNode {
-}
-
-#[derive(Clone, Debug)]
-pub struct OrNode {
-    pub left_value: Rc<Box<dyn ExprNode>>,
-    pub right_value: Rc<Box<dyn ExprNode>>,
-}
-
-impl ExprNode for OrNode {
+impl ExprNode for ArithmeticOpNode {
 }
 
 #[derive(Clone, Debug)]

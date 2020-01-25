@@ -17,25 +17,8 @@ use crate::ast_expr:: {
     AssginmentNode,
     SingeUnaryNode,
     SelfOpUnaryNode,
-    MultiplicationNode,
-    DivisionNode,
-    ModNode,
-    AddNode,
-    SubNode,
-    RightShiftNode,
-    LeftShiftNode,
-    BitAndNode,
-    BitXorNode,
-    BitOrNode,
-    GreaterNode,
-    GreaterEqualNode,
-    LessNode,
-    LessEqualNode,
-    EqualNode,
-    NotEqualNode,
-    AndNode,
-    OrNode,
     FuncCallNode,
+    ArithmeticOpNode,
 };
 use std::rc::Rc;
 
@@ -75,9 +58,10 @@ fn expr1(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
 }
 
 fn or_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+    let operator = lexer.advance();
     let t = expr2(&mut lexer);
-    Box::new(OrNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -97,9 +81,10 @@ fn expr2(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
 }
 
 fn and_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+    let operator = lexer.advance();
     let t = expr3(&mut lexer);
-    Box::new(AndNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -110,23 +95,10 @@ fn expr3(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     loop {
         let t = lexer.lookahead(1);
         match t {
-            Token::Greater => {
-                left_value = greater_expr(&mut lexer, left_value);
-            },
-            Token::Greaterequal => {
-                left_value = greater_equal_expr(&mut lexer, left_value);
-            },
-            Token::Less => {
-                left_value = less_expr(&mut lexer, left_value);
-            },
-            Token::Lessequal => {
-                left_value = less_equal_expr(&mut lexer, left_value);
-            },
-            Token::Equal => {
-                left_value = equal_expr(&mut lexer, left_value);
-            },
-            Token::Notequal => {
-                left_value = not_equal_expr(&mut lexer, left_value);
+            Token::Greater | Token::Greaterequal | 
+            Token::Less    | Token::Lessequal    |
+            Token::Equal   | Token::Notequal => {
+                left_value = arithmetic3_expr(&mut lexer, left_value);
             },
             _ => {
                 return left_value
@@ -135,55 +107,14 @@ fn expr3(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     }
 }
 
-fn greater_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+fn arithmetic3_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    /*
+        > >= < <= != == 
+    */
+    let operator = lexer.advance();
     let t = expr4(&mut lexer);
-    Box::new(GreaterNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn greater_equal_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = expr4(&mut lexer);
-    Box::new(GreaterEqualNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn less_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = expr4(&mut lexer);
-    Box::new(LessNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn less_equal_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = expr4(&mut lexer);
-    Box::new(LessEqualNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn equal_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = expr4(&mut lexer);
-    Box::new(EqualNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn not_equal_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = expr4(&mut lexer);
-    Box::new(NotEqualNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -205,9 +136,10 @@ fn expr4(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
 }
 
 fn bit_or_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+    let operator = lexer.advance();
     let t = expr5(&mut lexer);
-    Box::new(BitOrNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -229,9 +161,10 @@ fn expr5(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
 }
 
 fn bit_xor_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+    let operator = lexer.advance();
     let t = expr6(&mut lexer);
-    Box::new(BitXorNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -253,9 +186,10 @@ fn expr6(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
 }
 
 fn bit_and_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+    let operator = lexer.advance();
     let t = expr7(&mut lexer);
-    Box::new(BitAndNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -266,11 +200,8 @@ fn expr7(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     loop {
         let t = lexer.lookahead(1);
         match t {
-            Token::Rightshift => {
-                left_value = right_shift_expr(&mut lexer, left_value);
-            },
-            Token::Leftshift => {
-                left_value = left_shift_expr(&mut lexer, left_value);
+            Token::Rightshift | Token::Leftshift => {
+                left_value = arithmetic2_expr(&mut lexer, left_value);
             },
             _ => {
                 return left_value
@@ -279,19 +210,14 @@ fn expr7(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     }
 }
 
-fn right_shift_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+fn arithmetic2_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    /*
+        << >>
+    */
+    let operator = lexer.advance();
     let t = expr8(&mut lexer);
-    Box::new(RightShiftNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn left_shift_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = expr8(&mut lexer);
-    Box::new(LeftShiftNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -302,11 +228,8 @@ fn expr8(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     loop {
         let t = lexer.lookahead(1);
         match t {
-            Token::Add => {
-                left_value = add_expr(&mut lexer, left_value);
-            },
-            Token::Sub => {
-                left_value = sub_expr(&mut lexer, left_value);
+            Token::Add| Token::Sub => {
+                left_value = arithmetic1_expr(&mut lexer, left_value);
             },
             _ => {
                 return left_value
@@ -315,19 +238,14 @@ fn expr8(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     }
 }
 
-fn add_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+fn arithmetic1_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    /*
+        add and sub
+    */
+    let operator = lexer.advance();
     let t = expr9(&mut lexer);
-    Box::new(AddNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn sub_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = expr9(&mut lexer);
-    Box::new(SubNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -338,15 +256,9 @@ fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     loop {
         let t = lexer.lookahead(1);
         match t {
-            Token::Mul => {
-                left_value = multiplication_expr(&mut lexer, left_value);
+            Token::Mul | Token::Div | Token::Mod=> {
+                left_value = arithmetic0_expr(&mut lexer, left_value);
             },
-            Token::Div => {
-                left_value = division_expr(&mut lexer, left_value);
-            },
-            Token::Mod => {
-                left_value = mod_expr(&mut lexer, left_value);
-            }
             _ => {
                 return left_value
             },
@@ -354,28 +266,14 @@ fn expr9(mut lexer: &mut Lexer) -> Box<dyn ExprNode> {
     }
 }
 
-fn multiplication_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
+fn arithmetic0_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
+    /*
+        Three arithmetic operators of the same priority, multiply, divide and mod
+    */ 
+    let operator = lexer.advance();
     let t = term(&mut lexer);
-    Box::new(MultiplicationNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn division_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = term(&mut lexer);
-    Box::new(DivisionNode {
-        left_value: Rc::new(node),
-        right_value: Rc::new(t),
-    })
-}
-
-fn mod_expr(mut lexer: &mut Lexer, node: Box<dyn ExprNode>) -> Box<dyn ExprNode> {
-    lexer.advance();
-    let t = term(&mut lexer);
-    Box::new(ModNode {
+    Box::new(ArithmeticOpNode {
+        operator,
         left_value: Rc::new(node),
         right_value: Rc::new(t),
     })
@@ -584,7 +482,7 @@ mod tests {
 
     #[test]
     fn test_expr0() {
-        let mut lxr = Lexer::new(String::from("(int *[]) a++ = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3)"));
+        let mut lxr = Lexer::new(String::from("(int *[]) a++ = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3) * 9"));
         let node = expr0(&mut lxr);
         println!("{:?}", node);
     }
