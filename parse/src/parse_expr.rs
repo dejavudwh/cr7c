@@ -19,6 +19,7 @@ use crate::ast_expr:: {
     SelfOpUnaryNode,
     FuncCallNode,
     ArithmeticOpNode,
+    ArrayUnaryNode,
 };
 use std::rc::Rc;
 
@@ -347,6 +348,13 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
                     primary: pn,
                     params: func_call_params_expr(&mut lexer),
                 })
+            },
+            Token::LBrackets => {
+                return Box::new(ArrayUnaryNode {
+                    prefix: t,
+                    primary: pn,
+                    postfix: array_expr(&mut lexer),
+                })
             }
             _ => panic!("unexcept token!")
             // TODO other type
@@ -358,6 +366,28 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
         primary: pn,
     })
 }
+
+fn array_expr(mut lexer: &mut Lexer) -> Vec<Box<dyn ExprNode>> {
+    let mut v = Vec::new();
+    lexer.matcher(Token::LBrackets);
+    let mut expr = expr0(&mut lexer);
+    v.push(expr);
+    lexer.matcher(Token::RBrackets);
+
+    loop {
+        if lexer.lookahead(1) == Token::LBrackets {
+            lexer.matcher(Token::LBrackets);
+            expr = expr0(&mut lexer);
+            v.push(expr);
+            lexer.matcher(Token::RBrackets);
+        } else {
+            break;
+        }
+    }
+
+    return v
+}
+
 
 fn func_call_params_expr(mut lexer: &mut Lexer) -> Option<Vec<Rc<Box<dyn ExprNode>>>> {
     if lexer.lookahead(1) == Token::RParentheses {
@@ -485,7 +515,7 @@ mod tests {
 
     #[test]
     fn test_expr0() {
-        let mut lxr = Lexer::new(String::from("(int *[]) a->b.c = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3) * 9"));
+        let mut lxr = Lexer::new(String::from("(int *[]) a->b.c = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3) * 9 / b[1][2]"));
         let node = expr0(&mut lxr);
         println!("{:?}", node);
     }

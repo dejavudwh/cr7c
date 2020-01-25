@@ -71,14 +71,14 @@ pub struct SelfOpUnaryNode {
 impl UnaryNode for SelfOpUnaryNode {
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ArrayUnaryNode {
     /*
         [prefix] primary [expr]
     */
-    prefix: Option<Token>,
-    primary: PrimaryNode,
-    postfix: Rc<Box<dyn ExprNode>>,
+    pub prefix: Option<Token>,
+    pub primary: PrimaryNode,
+    pub postfix: Vec<Box<dyn ExprNode>>,
 }
 
 impl UnaryNode for ArrayUnaryNode {
