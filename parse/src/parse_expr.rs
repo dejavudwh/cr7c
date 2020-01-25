@@ -309,8 +309,10 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
     let pn = primary(&mut lexer);
 
     if is_postfix_op(&lexer.lookahead(1)) {
+        println!("unary suffix {}", lexer.lookahead(1));
         match lexer.lookahead(1) {
             Token::Dot => {
+                lexer.advance();
                 return Box::new(RefUnaryNode {
                     prefix: t,
                     primary: pn,
@@ -318,6 +320,7 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
                 })
             },
             Token::PointerRef => {
+                lexer.advance();
                 return Box::new(PointerRefUnaryNode {
                     prefix: t,
                     primary: pn,
@@ -482,7 +485,7 @@ mod tests {
 
     #[test]
     fn test_expr0() {
-        let mut lxr = Lexer::new(String::from("(int *[]) a++ = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3) * 9"));
+        let mut lxr = Lexer::new(String::from("(int *[]) a->b.c = 7++ >> 6 & (4 || 3) ^ 2 && 1 + func(2, 3) * 9"));
         let node = expr0(&mut lxr);
         println!("{:?}", node);
     }
