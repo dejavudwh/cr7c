@@ -13,3 +13,4 @@ members = [
 [dependencies]
 lex = { path = "./lex" }
 parse = {path = "./parse"}
+analysis = {path = "./analysis"}
