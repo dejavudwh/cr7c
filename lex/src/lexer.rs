@@ -99,7 +99,9 @@ impl Lexer {
 
     fn can_be_identifier(&mut self) -> bool {
         let next_char = self.chars[self.read_pos];
-        return self.cur_text.len() > 0 && !next_char.is_ascii_alphabetic() && next_char != '_' || next_char == '.'
+        let not_null = self.cur_text.len() > 0;
+        let next_invalid = !(next_char.is_ascii_alphabetic()) && !(next_char.is_ascii_digit());
+        return  not_null && next_invalid && next_char != '_' || next_char == '.'
     }
 
     fn handle_valid_char(&mut self, ch: char) -> Option<Token> {
@@ -128,7 +130,14 @@ impl Lexer {
             '=' => Some(self.assgin_or_equal_tokean()),
             '"' => Some(self.string_token()),
             '\'' => Some(self.char_token()),
-            '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => Some(self.number_token()),
+            '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
+                println!(" == = = = = === = == = {} {}", ch, self.cur_text.len());
+                if self.cur_text.len() == 0 {
+                    return Some(self.number_token())
+                } else {
+                    return None
+                }
+            },
             _ => None,
         }
     }

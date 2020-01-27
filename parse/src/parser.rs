@@ -41,7 +41,7 @@ mod tests {
 
             int abc = 1;
             struct student {
-                char[] name;
+                char[] *name;
                 int age;
                 int sex;
             };
@@ -52,7 +52,7 @@ mod tests {
 
             int main(int argc,char **argv) {
                 struct class a;
-                int a = 1;
+                int a1 = 1;
                 for(i = 0; i < 10; i++) {
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);
                     if (a == 2) {

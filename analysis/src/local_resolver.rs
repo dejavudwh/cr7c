@@ -7,11 +7,11 @@ use lex::lexer::Lexer;
 use parse::parser::parse;
 use parse::symbol_table::TopLevelScope;
 
-pub fn local_resolver(ast: ProgramNode) {
-    
+pub fn local_resolver(ast: ProgramNode) -> TopLevelScope {
+    return get_symboltable(ast.defs)
 }
 
-fn global_def(node: TopDefNode) -> TopLevelScope {
+fn get_symboltable(node: TopDefNode) -> TopLevelScope {
     let mut scope = TopLevelScope::new();
     for var in node.var_defs {
         var.fill_symbol(&mut scope);
@@ -30,7 +30,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_global_def() {
+    fn test_local_resolver() {
         let mut lxr = Lexer::new(String::from("
             import a.b.c;
             import z.x.c;
@@ -49,7 +49,7 @@ mod tests {
 
             int main(int argc,char **argv) {
                 struct class a;
-                int ba = 1;
+                int ba1 = 1;
                 int bb = 2;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
@@ -80,6 +80,6 @@ mod tests {
             }
         "));
         let ast = parse(&mut lxr);
-        println!("{:?}", global_def(ast.defs));
+        println!("{:?}", local_resolver(ast));
     }
 }
