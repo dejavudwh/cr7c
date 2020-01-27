@@ -12,12 +12,7 @@ pub fn local_resolver(ast: ProgramNode) {
 }
 
 fn global_def(node: TopDefNode) -> TopLevelScope {
-    let mut scope = TopLevelScope {
-        global_var_map: HashMap::new(),
-        global_define_map: HashMap::new(),
-        func_map: HashMap::new(),
-        scopes: Vec::new(),
-    };
+    let mut scope = TopLevelScope::new();
     for var in node.var_defs {
         var.fill_symbol(&mut scope);
     }
