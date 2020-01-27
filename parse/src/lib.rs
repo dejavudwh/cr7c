@@ -1,5 +1,6 @@
 pub mod parser;
-mod ast;
+pub mod ast;
+pub mod symbol_table;
 mod ast_expr;
 mod ast_stmt;
 mod parse_def;

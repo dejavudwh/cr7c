@@ -9,8 +9,8 @@ use crate::parse_def:: {
     top_defs,
 };
 
-pub fn parse(mut lexer: &mut Lexer) {
-    compilation_unit(&mut lexer);
+pub fn parse(mut lexer: &mut Lexer) -> ProgramNode {
+    return compilation_unit(&mut lexer)
 }
 
 fn compilation_unit(mut lexer: &mut Lexer) -> ProgramNode {
@@ -44,15 +44,15 @@ mod tests {
                 char[] name;
                 int age;
                 int sex;
-            }
+            };
 
             struct class {
                 struct student[] *ss;
-            }
+            };
 
             int main(int argc,char **argv) {
+                struct class a;
                 int a = 1;
-                int i;
                 for(i = 0; i < 10; i++) {
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);
                     if (a == 2) {
@@ -61,6 +61,7 @@ mod tests {
                         continue;
                     }
                 }
+                int i;
 
                 return 0;
             }

@@ -1,8 +1,17 @@
 use crate::ast_expr::ExprNode;
 use crate::ast::DefVarNode;
 use std::fmt;
+use std::rc::Rc;
+use std::cell::RefCell;
+use crate::symbol_table:: {
+    TopLevelScope,
+    LocalScope,
+};
+use crate::ast::DefNode;
 
-pub trait StmtNode:fmt::Debug {}
+pub trait StmtNode:fmt::Debug {
+    fn fill_symbol(&self, scope: &mut TopLevelScope) {}
+}
 
 #[derive(Debug)]
 pub struct BlockNode {
@@ -11,11 +20,27 @@ pub struct BlockNode {
             defvar *  stmts *
         }
     */
-    pub defvars: Vec<DefVarNode>,
-    pub stmts: Vec<Box<dyn StmtNode>>,
+    pub defvars: Vec<Box<dyn DefNode>>,
+    pub stmts: Vec<Rc<Box<dyn StmtNode>>>,
 }
 
-impl StmtNode for BlockNode {}
+impl StmtNode for BlockNode {
+    fn fill_symbol(&self, scope: &mut TopLevelScope) {
+        let local = Rc::new(RefCell::new(LocalScope::new()));
+        let parent = &scope.scope_stack[scope.scope_stack.len() - 1];
+        local.borrow_mut().parent = Some(Rc::clone(parent));
+        parent.borrow_mut().scopes.push(Rc::clone(&local));
+        scope.scope_stack.push(Rc::clone(&local));
+        for var in &self.defvars {
+            var.fill_symbol(scope);
+        }
+
+        for stmt in self.stmts.clone() {
+            stmt.fill_symbol(scope);
+        }
+        scope.scope_stack.pop();
+    }
+}
 
 #[derive(Debug)]
 pub struct IfStmtNode {
@@ -27,7 +52,16 @@ pub struct IfStmtNode {
     pub else_stmt: Option<Box<dyn StmtNode>>,
 }
 
-impl StmtNode for IfStmtNode {}
+impl StmtNode for IfStmtNode {
+    fn fill_symbol(&self, scope: &mut TopLevelScope) {
+        let local = Rc::new(RefCell::new(LocalScope::new()));
+        local.borrow_mut().parent = Some(Rc::clone(&scope.scope_stack[scope.scope_stack.len() - 1]));
+        self.if_stmt.fill_symbol(scope);
+        if let Some(block) = &self.else_stmt {
+            block.fill_symbol(scope);
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct ExprStmtNode {
@@ -45,7 +79,13 @@ pub struct WhileStmtNode {
     pub stmts: Box<dyn StmtNode>,
 }
 
-impl StmtNode for WhileStmtNode {}
+impl StmtNode for WhileStmtNode {
+    fn fill_symbol(&self, scope: &mut TopLevelScope) {
+        let local = Rc::new(RefCell::new(LocalScope::new()));
+        local.borrow_mut().parent = Some(Rc::clone(&scope.scope_stack[scope.scope_stack.len() - 1]));
+        self.stmts.fill_symbol(scope);
+    }
+}
 
 #[derive(Debug)]
 pub struct DoWhileStmtNode {
@@ -56,7 +96,13 @@ pub struct DoWhileStmtNode {
     pub stmts: Box<dyn StmtNode>,
 }
 
-impl StmtNode for DoWhileStmtNode {}
+impl StmtNode for DoWhileStmtNode {
+    fn fill_symbol(&self, scope: &mut TopLevelScope) {
+        let local = Rc::new(RefCell::new(LocalScope::new()));
+        local.borrow_mut().parent = Some(Rc::clone(&scope.scope_stack[scope.scope_stack.len() - 1]));
+        self.stmts.fill_symbol(scope);
+    }
+}
 
 #[derive(Debug)]
 pub struct ForStmtNode {
@@ -69,7 +115,13 @@ pub struct ForStmtNode {
     pub stmts: Box<dyn StmtNode>,
 }
 
-impl StmtNode for ForStmtNode {}
+impl StmtNode for ForStmtNode {
+    fn fill_symbol(&self, scope: &mut TopLevelScope) {
+        let local = Rc::new(RefCell::new(LocalScope::new()));
+        local.borrow_mut().parent = Some(Rc::clone(&scope.scope_stack[scope.scope_stack.len() - 1]));
+        self.stmts.fill_symbol(scope);
+    }
+}
 
 #[derive(Debug)]
 pub struct ReturnStmtNode {

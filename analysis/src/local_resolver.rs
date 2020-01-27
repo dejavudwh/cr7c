@@ -35,7 +35,8 @@ mod tests {
             import a.b.c;
             import z.x.c;
 
-            int abc = 1;
+            int aa = 1;
+            int ab = 2;
             struct student {
                 char[] name;
                 int age;
@@ -48,21 +49,33 @@ mod tests {
 
             int main(int argc,char **argv) {
                 struct class a;
-                int a = 1;
-                int i;
+                int ba = 1;
+                int bb = 2;
                 for(i = 0; i < 10; i++) {
+                    int ca = 1;
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);
                     if (a == 2) {
+                        int da = 12;
                         break;
                     } else {
                         continue;
                     }
                 }
 
+                while(1 == 2) {
+                    int cb = 1;
+                }
+
                 return 0;
             }
 
             int calc(int a) {
+                int a = 1;
+
+                while(1 == 2) {
+                    int aab = 1;
+                }
+
                 return a;
             }
         "));

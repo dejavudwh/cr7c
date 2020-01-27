@@ -20,6 +20,8 @@ use crate::parse_def:: {
     defvar,
     typeref,
 };
+use std::rc::Rc;
+use crate::ast::DefNode;
 
 fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
     let t = lexer.lookahead(1);
@@ -60,10 +62,11 @@ fn statement(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
 pub fn block(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
     lexer.advance();
 
-    let mut defvars = Vec::new();
+    let mut defvars: Vec<Box<dyn DefNode>> = Vec::new();
     let mut stmts = Vec::new();
     loop {
         let t = lexer.lookahead(1);
+        println!(" block token : {}", t);
         if t == Token::RBrace {
             lexer.advance();
             break;
@@ -71,9 +74,9 @@ pub fn block(mut lexer: &mut Lexer) -> Box<dyn StmtNode> {
             lexer.advance();
         } else if is_base_type(&t) {
             let typeref = typeref(&mut lexer);
-            defvars.push(defvar(&mut lexer, typeref));
+            defvars.push(Box::new(defvar(&mut lexer, typeref)));
         } else {
-            stmts.push(statement(&mut lexer));
+            stmts.push(Rc::new(statement(&mut lexer)));
         }
     }
 

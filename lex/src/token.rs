@@ -86,6 +86,7 @@ pub fn get_keywords() -> HashMap<String, Token> {
     map.insert(String::from("long"), Token::Long);
     map.insert(String::from("short"), Token::Short);
     map.insert(String::from("for"), Token::For);
+    map.insert(String::from("while"), Token::While);
     map.insert(String::from("if"), Token::If);
     map.insert(String::from("else"), Token::Else);
     map.insert(String::from("do"), Token::Do);

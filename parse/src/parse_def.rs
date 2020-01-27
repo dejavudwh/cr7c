@@ -58,19 +58,20 @@ fn import_statement(mut lexer: &mut Lexer) -> ImportStmtNode {
 }
 
 pub fn top_defs(mut lexer: &mut Lexer) -> TopDefNode {
-    let mut defs: Vec<Box<dyn DefNode>> = Vec::new();
+    let mut var_defs: Vec<Rc<Box<dyn DefNode>>> = Vec::new();
+    let mut func_defs: Vec<Rc<Box<dyn DefNode>>> = Vec::new();
 
     loop {
         let t = lexer.lookahead(1);
         println!(" ========== loop times {}", t);
         if t == Token::Struct {
-            defs.push(Box::new(defstruct(&mut lexer)));
+            var_defs.push(Rc::new(Box::new(defstruct(&mut lexer))));
         } else if is_base_type(&t) {
             let typeref = typeref(&mut lexer);
             if lexer.lookahead(2) == Token::LParentheses {
-                defs.push(Box::new(deffunc(&mut lexer, typeref)));
+                func_defs.push(Rc::new(Box::new(deffunc(&mut lexer, typeref))));
             } else {
-                defs.push(Box::new(defvar(&mut lexer, typeref)));
+                var_defs.push(Rc::new(Box::new(defvar(&mut lexer, typeref))));
             }
         } else {
             break;
@@ -78,7 +79,8 @@ pub fn top_defs(mut lexer: &mut Lexer) -> TopDefNode {
     }
 
     TopDefNode {
-        defs,
+        var_defs,
+        func_defs
     }
 }
 
@@ -103,6 +105,7 @@ pub fn defstruct(mut lexer: &mut Lexer) -> DefStructNode {
     }
 
     lexer.matcher(Token::RBrace);
+    lexer.matcher(Token::Semi);
 
     DefStructNode {
         name,
@@ -213,7 +216,7 @@ fn deffunc(mut lexer: &mut Lexer, typeref: TypeNode) -> DefFuncNode {
     lexer.advance();
 
     let params = params(&mut lexer);
-    let block = block(&mut lexer);
+    let block = Rc::new(block(&mut lexer));
 
     DefFuncNode {
         typeref,
@@ -316,7 +319,7 @@ mod tests {
             struct stu b;
             float* c;
             int[2] d;
-        }"));
+        };"));
         println!("{:?}", defstruct(&mut lxr));
     }
 
