@@ -2,57 +2,31 @@ use std::collections::HashMap;
 use parse::ast:: {
     ProgramNode,
     TopDefNode,
-    DefNode,
 };
-use std::fmt;
-use std::rc::Rc;
 use lex::lexer::Lexer;
 use parse::parser::parse;
-
-struct TopLevelScope {
-    pub global_var_map: HashMap<String, Rc<Box<dyn DefNode>>>,
-    pub func_map: HashMap<String, Rc<Box<dyn DefNode>>>,
-    pub scopes: Vec<LocalScope>,
-}
-
-impl fmt::Debug for TopLevelScope {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?} {:?}", self.global_var_map, self.func_map)
-    }
-}
-
-struct LocalScope {
-    pub var_map: HashMap<String, Box<dyn DefNode>>,
-    pub scopes: Vec<LocalScope>,
-}
+use parse::symbol_table::TopLevelScope;
 
 pub fn local_resolver(ast: ProgramNode) {
     
 }
 
 fn global_def(node: TopDefNode) -> TopLevelScope {
-    let mut global_var_map = HashMap::new();
-    let mut func_map = HashMap::new();
+    let mut scope = TopLevelScope {
+        global_var_map: HashMap::new(),
+        global_define_map: HashMap::new(),
+        func_map: HashMap::new(),
+        scopes: Vec::new(),
+    };
     for var in node.var_defs {
-        let names = var.get_names();
-        for name in names {
-            println!("=== {}", name);
-            global_var_map.insert(name, var.clone());
-        }
-    }
-    for func in node.func_defs {
-        let names = func.get_names();
-        for name in names {
-            println!("=== {}", name);
-            func_map.insert(name, func.clone());
-        }
+        var.fill_symbol(&mut scope);
     }
 
-    TopLevelScope {
-        global_var_map,
-        func_map,
-        scopes: Vec::new(),
+    for func in node.func_defs {
+        func.fill_symbol(&mut scope);
     }
+
+    return scope
 }
 
 
