@@ -5,9 +5,6 @@ use crate::ast::TypeNode;
 use std::result::Result;
 
 pub trait ExprNode:fmt::Debug {
-    fn is_leftvalue(&self) -> Result<(), String> {
-        return Ok(())
-    }
     fn check_expr_validity(&self) {}
 }
 
@@ -22,10 +19,7 @@ pub struct AssginmentNode {
 
 impl ExprNode for AssginmentNode {
     fn check_expr_validity(&self) {
-        let result = self.left_value.is_leftvalue();
-        if result.is_err() {
-            panic!(result.err().unwrap())
-        }
+        self.left_value.check_expr_validity();
     }
 }
 
@@ -52,15 +46,13 @@ pub struct TermNode {
 }
 
 impl ExprNode for TermNode {
-    fn is_leftvalue(&self) -> Result<(), String> {
-        return self.unary.is_leftvalue()
+    fn check_expr_validity(&self) {
+        self.unary.check_expr_validity();
     }
 }
 
 pub trait UnaryNode:fmt::Debug {
-    fn is_leftvalue(&self) -> Result<(), String> {
-        return Ok(())
-    }
+    fn check_expr_validity(&self) {}
 }
 
 #[derive(Clone, Debug)]
@@ -73,8 +65,8 @@ pub struct SingeUnaryNode {
 }
 
 impl UnaryNode for SingeUnaryNode {
-    fn is_leftvalue(&self) -> Result<(), String> {
-        return self.primary.is_leftvalue()
+    fn check_expr_validity(&self) {
+        self.primary.check_expr_validity();
     }
 }
 
@@ -153,13 +145,13 @@ pub struct PrimaryNode {
 }
 
 impl UnaryNode for PrimaryNode {
-    fn is_leftvalue(&self) -> Result<(), String> {
+    fn check_expr_validity(&self) {
         match &self.value {
-            Const::Identifier => Ok(()),
-            Const::Integer(value) => Err(format!("Unexpect an left value: {}", value)),
-            Const::Char(value) => Err(format!("Unexpect an left value: {}", value)),
-            Const::String(value) => Err(format!("Unexpect an left value: {}", value)),
-            Const::ParenthesesExpr(value) => Err(format!("Unexpect an left value: {:?}", value)),
+            Const::Identifier => (),
+            Const::Integer(value) => panic!(format!("Unexpect an left value: {}", value)),
+            Const::Char(value) => panic!(format!("Unexpect an left value: {}", value)),
+            Const::String(value) => panic!(format!("Unexpect an left value: {}", value)),
+            Const::ParenthesesExpr(value) => panic!(format!("Unexpect an left value: {:?}", value)),
         }
     }
 }
