@@ -72,7 +72,6 @@ pub trait UnaryNode:fmt::Debug {
     fn is_leftvalue(&self) -> Result<(), String> {
         return Ok(())
     }
-
     fn check_expr_validity(&self) {}
 }
 
@@ -89,10 +88,6 @@ impl UnaryNode for SingeUnaryNode {
     fn is_leftvalue(&self) -> Result<(), String> {
         return self.primary.is_leftvalue()
     }
-
-    fn check_expr_validity(&self) {
-        self.primary.check_expr_validity();
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -106,6 +101,10 @@ pub struct SelfOpUnaryNode {
 }
 
 impl UnaryNode for SelfOpUnaryNode {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return self.primary.is_leftvalue()
+    }
+
     fn check_expr_validity(&self) {
         self.primary.check_expr_validity();
     }
@@ -122,6 +121,10 @@ pub struct ArrayUnaryNode {
 }
 
 impl UnaryNode for ArrayUnaryNode {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return self.primary.is_leftvalue()
+    }
+
     fn check_expr_validity(&self) {
         let literal = self.primary.get_type();
         if literal != String::from("Identifier") {
@@ -141,6 +144,10 @@ pub struct RefUnaryNode {
 }
 
 impl UnaryNode for RefUnaryNode {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return self.primary.is_leftvalue()
+    }
+    
     fn check_expr_validity(&self) {
         self.primary.check_expr_validity();
     }
@@ -157,6 +164,10 @@ pub struct PointerRefUnaryNode {
 }
 
 impl UnaryNode for PointerRefUnaryNode {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return self.primary.is_leftvalue()
+    }
+    
     fn check_expr_validity(&self) {
         self.primary.check_expr_validity();
     }
@@ -173,6 +184,10 @@ pub struct FuncCallNode {
 }
 
 impl UnaryNode for FuncCallNode {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return self.primary.is_leftvalue()
+    }
+    
     fn check_expr_validity(&self) {
         self.primary.check_expr_validity();
     }
