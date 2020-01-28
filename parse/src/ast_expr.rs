@@ -26,6 +26,9 @@ impl ExprNode for AssginmentNode {
         if result.is_err() {
             panic!(result.err().unwrap())
         }
+
+        self.left_value.check_expr_validity();
+        self.right_value.check_expr_validity();
     }
 }
 
@@ -40,6 +43,10 @@ pub struct ArithmeticOpNode {
 }
 
 impl ExprNode for ArithmeticOpNode {
+    fn check_expr_validity(&self) {
+        self.left_value.check_expr_validity();
+        self.right_value.check_expr_validity();
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -55,12 +62,18 @@ impl ExprNode for TermNode {
     fn is_leftvalue(&self) -> Result<(), String> {
         return self.unary.is_leftvalue()
     }
+
+    fn check_expr_validity(&self) {
+        self.unary.check_expr_validity();
+    }
 }
 
 pub trait UnaryNode:fmt::Debug {
     fn is_leftvalue(&self) -> Result<(), String> {
         return Ok(())
     }
+
+    fn check_expr_validity(&self) {}
 }
 
 #[derive(Clone, Debug)]
@@ -76,6 +89,10 @@ impl UnaryNode for SingeUnaryNode {
     fn is_leftvalue(&self) -> Result<(), String> {
         return self.primary.is_leftvalue()
     }
+
+    fn check_expr_validity(&self) {
+        self.primary.check_expr_validity();
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -89,6 +106,9 @@ pub struct SelfOpUnaryNode {
 }
 
 impl UnaryNode for SelfOpUnaryNode {
+    fn check_expr_validity(&self) {
+        self.primary.check_expr_validity();
+    }
 }
 
 #[derive(Debug)]
@@ -102,6 +122,12 @@ pub struct ArrayUnaryNode {
 }
 
 impl UnaryNode for ArrayUnaryNode {
+    fn check_expr_validity(&self) {
+        let literal = self.primary.get_type();
+        if literal != String::from("Identifier") {
+            panic!(format!("\"{}\" Type! Cannot be referenced as an array", literal));
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -115,6 +141,9 @@ pub struct RefUnaryNode {
 }
 
 impl UnaryNode for RefUnaryNode {
+    fn check_expr_validity(&self) {
+        self.primary.check_expr_validity();
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -128,6 +157,9 @@ pub struct PointerRefUnaryNode {
 }
 
 impl UnaryNode for PointerRefUnaryNode {
+    fn check_expr_validity(&self) {
+        self.primary.check_expr_validity();
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -141,6 +173,9 @@ pub struct FuncCallNode {
 }
 
 impl UnaryNode for FuncCallNode {
+    fn check_expr_validity(&self) {
+        self.primary.check_expr_validity();
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -150,6 +185,18 @@ pub struct PrimaryNode {
     */
     pub name: Option<String>,
     pub value: Const,
+}
+
+impl PrimaryNode {
+    fn get_type(&self) -> String {
+        match &self.value {
+            Const::Integer(value) => return String::from("Integer"),
+            Const::Char(value) => return String::from("Char"),
+            Const::String(value) => return String::from("String"),
+            Const::Identifier => return String::from("Identifier"),
+            Const::ParenthesesExpr(value) => return String::from("Expr"),
+        }
+    }
 }
 
 impl UnaryNode for PrimaryNode {
