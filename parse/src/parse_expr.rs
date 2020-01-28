@@ -390,7 +390,9 @@ fn array_expr(mut lexer: &mut Lexer) -> Vec<Box<dyn ExprNode>> {
 
 
 fn func_call_params_expr(mut lexer: &mut Lexer) -> Option<Vec<Rc<Box<dyn ExprNode>>>> {
-    if lexer.lookahead(1) == Token::RParentheses {
+    if lexer.lookahead(2) == Token::RParentheses {
+        lexer.advance();
+        lexer.advance();
         return None
     } else {
         lexer.advance();
