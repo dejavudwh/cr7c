@@ -121,7 +121,8 @@ pub fn is_prefix_op(token: &Token) -> bool {
     *token == Token::Sub    ||
     *token == Token::Mul    ||
     *token == Token::Not    ||
-    *token == Token::Pointer
+    *token == Token::Pointer||
+    *token == Token::Bitand
 }
 
 pub fn is_postfix_op(token: &Token) -> bool {

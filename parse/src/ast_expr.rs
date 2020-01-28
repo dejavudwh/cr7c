@@ -2,8 +2,13 @@ use lex::token::Token;
 use std::rc::Rc;
 use std::fmt;
 use crate::ast::TypeNode;
+use std::result::Result;
 
 pub trait ExprNode:fmt::Debug {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return Ok(())
+    }
+    fn check_expr_validity(&self) {}
 }
 
 #[derive(Clone, Debug)]
@@ -16,6 +21,12 @@ pub struct AssginmentNode {
 }
 
 impl ExprNode for AssginmentNode {
+    fn check_expr_validity(&self) {
+        let result = self.left_value.is_leftvalue();
+        if result.is_err() {
+            panic!(result.err().unwrap())
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -41,9 +52,15 @@ pub struct TermNode {
 }
 
 impl ExprNode for TermNode {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return self.unary.is_leftvalue()
+    }
 }
 
 pub trait UnaryNode:fmt::Debug {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return Ok(())
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -56,6 +73,9 @@ pub struct SingeUnaryNode {
 }
 
 impl UnaryNode for SingeUnaryNode {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        return self.primary.is_leftvalue()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -133,6 +153,15 @@ pub struct PrimaryNode {
 }
 
 impl UnaryNode for PrimaryNode {
+    fn is_leftvalue(&self) -> Result<(), String> {
+        match &self.value {
+            Const::Identifier => Ok(()),
+            Const::Integer(value) => Err(format!("Unexpect an left value: {}", value)),
+            Const::Char(value) => Err(format!("Unexpect an left value: {}", value)),
+            Const::String(value) => Err(format!("Unexpect an left value: {}", value)),
+            Const::ParenthesesExpr(value) => Err(format!("Unexpect an left value: {:?}", value)),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

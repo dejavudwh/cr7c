@@ -53,6 +53,7 @@ mod tests {
             int main(int argc,char **argv) {
                 struct class a;
                 int a1 = 1;
+                &a;
                 calc();
                 for(i = 0; i < 10; i++) {
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);

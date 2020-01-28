@@ -28,7 +28,8 @@ pub struct ImportStmtNode {
 }
 
 pub trait DefNode:fmt::Debug {
-    fn fill_symbol(&self, scope: &mut TopLevelScope);
+    fn fill_symbol(&self, scope: &mut TopLevelScope) {}
+    fn check_expr_validity(&self) {}
 }
 
 #[derive(Clone, Debug)]
@@ -119,6 +120,10 @@ impl DefNode for DefFuncNode {
 
         scope.scope_stack.pop();
     }   
+
+    fn check_expr_validity(&self) {
+        self.block.check_expr_validity();
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]

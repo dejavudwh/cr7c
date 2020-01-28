@@ -11,6 +11,7 @@ use crate::ast::DefNode;
 
 pub trait StmtNode:fmt::Debug {
     fn fill_symbol(&self, scope: &mut TopLevelScope) {}
+    fn check_expr_validity(&self) {}
 }
 
 #[derive(Debug)]
@@ -40,6 +41,12 @@ impl StmtNode for BlockNode {
         }
         scope.scope_stack.pop();
     }
+
+    fn check_expr_validity(&self) {
+        for stmt in &self.stmts {
+            stmt.check_expr_validity();
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -61,6 +68,13 @@ impl StmtNode for IfStmtNode {
             block.fill_symbol(scope);
         }
     }
+
+    fn check_expr_validity(&self) {
+        self.if_stmt.check_expr_validity();
+        if let Some(block) = &self.else_stmt {
+            block.check_expr_validity();
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -68,7 +82,11 @@ pub struct ExprStmtNode {
     pub expr: Box<dyn ExprNode>,
 }
 
-impl StmtNode for ExprStmtNode {}
+impl StmtNode for ExprStmtNode {
+    fn check_expr_validity(&self) {
+        self.expr.check_expr_validity();
+    }
+}
 
 #[derive(Debug)]
 pub struct WhileStmtNode {
@@ -84,6 +102,10 @@ impl StmtNode for WhileStmtNode {
         let local = Rc::new(RefCell::new(LocalScope::new()));
         local.borrow_mut().parent = Some(Rc::clone(&scope.scope_stack[scope.scope_stack.len() - 1]));
         self.stmts.fill_symbol(scope);
+    }
+
+    fn check_expr_validity(&self) {
+        self.stmts.check_expr_validity();
     }
 }
 
@@ -101,6 +123,10 @@ impl StmtNode for DoWhileStmtNode {
         let local = Rc::new(RefCell::new(LocalScope::new()));
         local.borrow_mut().parent = Some(Rc::clone(&scope.scope_stack[scope.scope_stack.len() - 1]));
         self.stmts.fill_symbol(scope);
+    }
+
+    fn check_expr_validity(&self) {
+        self.stmts.check_expr_validity();
     }
 }
 
@@ -120,6 +146,10 @@ impl StmtNode for ForStmtNode {
         let local = Rc::new(RefCell::new(LocalScope::new()));
         local.borrow_mut().parent = Some(Rc::clone(&scope.scope_stack[scope.scope_stack.len() - 1]));
         self.stmts.fill_symbol(scope);
+    }
+
+    fn check_expr_validity(&self) {
+        self.stmts.check_expr_validity();
     }
 }
 
