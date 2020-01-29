@@ -29,6 +29,33 @@ impl TopLevelScope {
 
         return scope
     }
+
+    pub fn get_type(&self, name: String) -> TypeInfo {
+        let struct_type = self.global_define_map.get(&name);
+        if let Some(node) = struct_type {
+            return TypeInfo {
+                origin_struct: Some(node.clone()),
+                origin_base: None,
+                is_base_type: false,
+            }
+        } else {
+            let mut index = self.scope_stack.len() - 1;
+            loop {
+                if index <= 0 {
+                    panic!("Can't find the symbol \"{}\"", name);
+                }
+                let local = &self.scope_stack[index];
+                if let Some(node) = local.borrow_mut().var_map.get(&name) {
+                     return TypeInfo {
+                         origin_struct: None,
+                         origin_base: Some(node.clone()),
+                         is_base_type: true,
+                     }
+                }
+                index = index - 1;
+            }
+        }
+    }
 }
 
 impl fmt::Debug for TopLevelScope {
@@ -57,4 +84,11 @@ impl fmt::Debug for LocalScope {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "VAR: {:?} NEXT SCOPES: {:?} ", self.var_map.keys(), self.scopes)
     }
+}
+
+#[derive(Debug)]
+pub struct TypeInfo {
+    pub origin_struct: Option<DefStructNode>,
+    pub origin_base: Option<DefVarNode>,
+    pub is_base_type: bool,
 }
