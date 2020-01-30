@@ -129,7 +129,10 @@ impl UnaryNode for ArrayUnaryNode {
     fn check_expr_validity(&self, scope: &mut TopLevelScope) {
         let literal = self.primary.get_type();
         let var_type = scope.get_type(self.primary.get_name());
-        // println!("vat type === : {:?}", var_type);
+        println!("vat type === : {:?}", var_type);
+        if var_type.nested_def.len() <= 0 {
+            panic!(format!("The identifier \"{}\" is not an array or a pointer", var_type.name));
+        }
         if literal != String::from("Identifier") {
             panic!(format!("\"{}\" Type! Cannot be referenced as an array", literal));
         }

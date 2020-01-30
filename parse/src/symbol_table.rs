@@ -4,9 +4,11 @@ use crate::ast:: {
     DefStructNode,
     DefVarNode,
     DefFuncNode,
+    TypeDef,
 };
 use std::rc::Rc;
 use std::cell::RefCell;
+use lex::token::Token;
 
 pub struct TopLevelScope {
     pub global_define_map: HashMap<String, DefStructNode>,
@@ -79,30 +81,35 @@ impl TopLevelScope {
     }
 
     pub fn get_type(&self, name: String) -> TypeInfo {
-        let struct_type = self.global_define_map.get(&name);
-        if let Some(node) = struct_type {
-            return TypeInfo {
-                origin_struct: Some(node.clone()),
-                origin_base: None,
-                is_base_type: false,
+        let mut index = self.scope_stack.len();
+        // println!("get type {:?} {:?}", index, self.scope_stack);
+        loop {
+            if index == 0 {
+                panic!("Can't find the symbol \"{}\"", name);
             }
-        } else {
-            let mut index = self.scope_stack.len();
-            println!("get type {:?} {:?}", index, self.scope_stack);
-            loop {
-                if index == 0 {
-                    panic!("Can't find the symbol \"{}\"", name);
+            let local = &self.scope_stack[index - 1];
+            if let Some(node) = local.borrow_mut().var_map.get(&name) {
+                if node.typeref.type_base.base == Token::Struct {
+                    let struct_name = node.typeref.type_base.name.as_ref().unwrap().clone();
+                    let struct_type = self.global_define_map.get(&struct_name);
+                    return TypeInfo {
+                        name,
+                        origin_struct: Some(struct_type.unwrap().clone()),
+                        origin_base: None,
+                        base_type: Token::Struct,
+                        nested_def: node.typeref.nested_def.clone(),
+                    }
+                } else {
+                    return TypeInfo {
+                        name,
+                        origin_struct: None,
+                        origin_base: Some(node.clone()),
+                        base_type: node.typeref.type_base.base.clone(),
+                        nested_def: node.typeref.nested_def.clone(),
+                    }
                 }
-                let local = &self.scope_stack[index - 1];
-                if let Some(node) = local.borrow_mut().var_map.get(&name) {
-                     return TypeInfo {
-                         origin_struct: None,
-                         origin_base: Some(node.clone()),
-                         is_base_type: true,
-                     }
-                }
-                index = index - 1;
             }
+            index = index - 1;
         }
     }
 }
@@ -138,7 +145,9 @@ impl fmt::Debug for LocalScope {
 
 #[derive(Debug)]
 pub struct TypeInfo {
+    pub name: String,
     pub origin_struct: Option<DefStructNode>,
     pub origin_base: Option<DefVarNode>,
-    pub is_base_type: bool,
+    pub base_type: Token,
+    pub nested_def: Vec<TypeDef>,
 }

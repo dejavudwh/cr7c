@@ -38,11 +38,11 @@ mod tests {
             };
 
             int main(int argc,char **argv) {
-                struct class a;
+                struct teacher a;
                 int ba1 = 1;
-                int bb = 2;
+                int[] bb = 2;
                 bb = 1;
-                bb[1] = bb[1]+1;
+                bb[1] = ba1[1]+1;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);
@@ -56,8 +56,7 @@ mod tests {
 
                 while(1 == 2) {
                     int ca = 1;
-                    ca[2] = 1;
-                    da[3] = 1;
+                    ca = 2;
                 }
 
                 return 0;
