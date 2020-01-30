@@ -50,7 +50,7 @@ impl TopLevelScope {
             let local_children_size = self.order_block[self.order_block.len() - 1];
             // println!("order block {:?} {:?} {:?}", self.order_block, len, local_children_size);
             if len <= local_children_size {
-                let pop = self.scope_stack.pop();
+                self.scope_stack.pop();
                 // println!("order block in pop {:?}", pop);
                 self.order_block.pop();
                 let l = self.order_block.len() - 1;
@@ -60,17 +60,22 @@ impl TopLevelScope {
                 self.current_scope = Some(Rc::clone(last_local));
                 len = last_local.borrow_mut().scopes.len();
             } else {
+                self.current_scope = Some(Rc::clone(&local_scope));
                 break;
             }
         }
         // println!("last {:?}", self.order_block);
         let last = self.order_block[self.order_block.len() - 1];
-        println!("====== push {:?}", local_scope);
+        // println!("====== push {:?}", local_scope);
         // let local = &self.scope_stack[self.scope_stack.len() - 1];
         let local = &self.current_scope.as_ref().unwrap();
         let scope = &local.borrow_mut().scopes[last];
         self.scope_stack.push(Rc::clone(scope));
         self.order_block.push(0);
+    }
+
+    pub fn pop_block(&mut self) {
+        self.scope_stack.pop();
     }
 
     pub fn get_type(&self, name: String) -> TypeInfo {
@@ -82,12 +87,13 @@ impl TopLevelScope {
                 is_base_type: false,
             }
         } else {
-            let mut index = self.scope_stack.len() - 1;
+            let mut index = self.scope_stack.len();
+            println!("get type {:?} {:?}", index, self.scope_stack);
             loop {
-                if index <= 0 {
+                if index == 0 {
                     panic!("Can't find the symbol \"{}\"", name);
                 }
-                let local = &self.scope_stack[index];
+                let local = &self.scope_stack[index - 1];
                 if let Some(node) = local.borrow_mut().var_map.get(&name) {
                      return TypeInfo {
                          origin_struct: None,
@@ -125,7 +131,8 @@ impl LocalScope {
 
 impl fmt::Debug for LocalScope {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "VAR: {:?} NEXT SCOPES: {:?} ", self.var_map.keys(), self.scopes)
+        // write!(f, "VAR: {:?} NEXT SCOPES: {:?} ", self.var_map.keys(), self.scopes)
+        write!(f, "VAR: {:?} ", self.var_map.keys())
     }
 }
 

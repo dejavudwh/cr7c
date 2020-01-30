@@ -49,6 +49,7 @@ impl StmtNode for BlockNode {
         for stmt in &self.stmts {
             stmt.check_expr_validity(&mut scope);
         }
+        scope.pop_block();
     }
 }
 
