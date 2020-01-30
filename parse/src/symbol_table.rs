@@ -13,6 +13,8 @@ pub struct TopLevelScope {
     pub func_map: HashMap<String, DefFuncNode>,
     pub scopes: HashMap<String, Rc<RefCell<LocalScope>>>,
     pub scope_stack: Vec<Rc<RefCell<LocalScope>>>,
+    pub order_block: Vec<usize>,
+    pub current_scope: Option<Rc<RefCell<LocalScope>>>,
 }
 
 impl TopLevelScope {
@@ -22,12 +24,53 @@ impl TopLevelScope {
             func_map: HashMap::new(),
             scopes: HashMap::new(),
             scope_stack: Vec::new(),
+            order_block: Vec::new(),
+            current_scope: None,
         };
         let global_scope = Rc::new(RefCell::new(LocalScope::new()));
         scope.scopes.insert(String::from("GLOBAL"), Rc::clone(&global_scope));
         scope.scope_stack.push(Rc::clone(&global_scope));
 
         return scope
+    }
+
+    pub fn push_func(&mut self, name: String) {
+        self.order_block = Vec::new();
+        let local = &self.scopes.get(&name);
+        self.scope_stack.push(Rc::clone(local.unwrap()));
+        self.current_scope = Some(Rc::clone(local.unwrap()));
+        self.order_block.push(0);
+    }
+
+    pub fn push_block(&mut self, local_scope: Rc<RefCell<LocalScope>>) {
+        let l = local_scope.borrow_mut().scopes.len();
+        // println!("name {:?} len {:?}", local_scope.borrow_mut().var_map, l);
+        let mut len = local_scope.borrow_mut().scopes.len();
+        loop {
+            let local_children_size = self.order_block[self.order_block.len() - 1];
+            // println!("order block {:?} {:?} {:?}", self.order_block, len, local_children_size);
+            if len <= local_children_size {
+                let pop = self.scope_stack.pop();
+                // println!("order block in pop {:?}", pop);
+                self.order_block.pop();
+                let l = self.order_block.len() - 1;
+                let origin = self.order_block[l];
+                self.order_block[l] = origin + 1;
+                let last_local = &self.scope_stack[self.scope_stack.len() - 1];
+                self.current_scope = Some(Rc::clone(last_local));
+                len = last_local.borrow_mut().scopes.len();
+            } else {
+                break;
+            }
+        }
+        // println!("last {:?}", self.order_block);
+        let last = self.order_block[self.order_block.len() - 1];
+        println!("====== push {:?}", local_scope);
+        // let local = &self.scope_stack[self.scope_stack.len() - 1];
+        let local = &self.current_scope.as_ref().unwrap();
+        let scope = &local.borrow_mut().scopes[last];
+        self.scope_stack.push(Rc::clone(scope));
+        self.order_block.push(0);
     }
 
     pub fn get_type(&self, name: String) -> TypeInfo {

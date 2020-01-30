@@ -11,7 +11,7 @@ use crate::ast::DefNode;
 
 pub trait StmtNode:fmt::Debug {
     fn fill_symbol(&self, scope: &mut TopLevelScope) {}
-    fn check_expr_validity(&self) {}
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {}
 }
 
 #[derive(Debug)]
@@ -42,9 +42,12 @@ impl StmtNode for BlockNode {
         scope.scope_stack.pop();
     }
 
-    fn check_expr_validity(&self) {
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        let index = scope.scope_stack.len() - 1;
+        let local = &scope.scope_stack[index];
+        scope.push_block(Rc::clone(local));
         for stmt in &self.stmts {
-            stmt.check_expr_validity();
+            stmt.check_expr_validity(&mut scope);
         }
     }
 }
@@ -69,10 +72,10 @@ impl StmtNode for IfStmtNode {
         }
     }
 
-    fn check_expr_validity(&self) {
-        self.if_stmt.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.if_stmt.check_expr_validity(&mut scope);
         if let Some(block) = &self.else_stmt {
-            block.check_expr_validity();
+            block.check_expr_validity(&mut scope);
         }
     }
 }
@@ -83,8 +86,8 @@ pub struct ExprStmtNode {
 }
 
 impl StmtNode for ExprStmtNode {
-    fn check_expr_validity(&self) {
-        self.expr.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.expr.check_expr_validity(&mut scope);
     }
 }
 
@@ -104,8 +107,8 @@ impl StmtNode for WhileStmtNode {
         self.stmts.fill_symbol(scope);
     }
 
-    fn check_expr_validity(&self) {
-        self.stmts.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.stmts.check_expr_validity(&mut scope);
     }
 }
 
@@ -125,8 +128,8 @@ impl StmtNode for DoWhileStmtNode {
         self.stmts.fill_symbol(scope);
     }
 
-    fn check_expr_validity(&self) {
-        self.stmts.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.stmts.check_expr_validity(&mut scope);
     }
 }
 
@@ -148,8 +151,8 @@ impl StmtNode for ForStmtNode {
         self.stmts.fill_symbol(scope);
     }
 
-    fn check_expr_validity(&self) {
-        self.stmts.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.stmts.check_expr_validity(&mut scope);
     }
 }
 

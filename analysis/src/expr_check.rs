@@ -3,12 +3,14 @@ use parse::ast::ProgramNode;
 use lex::token::Token;
 use parse::parser::parse;
 use lex::lexer::Lexer;
+use parse::symbol_table::TopLevelScope;
+use crate::local_resolver::local_resolver;
 
-fn check_expr(ast: ProgramNode) {
-    let funcs = ast.defs.func_defs;
+fn check_expr(ast: &ProgramNode, mut symboltable: &mut TopLevelScope) {
+    let funcs = &ast.defs.func_defs;
 
     for func in funcs {
-        func.check_expr_validity();
+        func.check_expr_validity(&mut symboltable);
     }
 }
 
@@ -40,7 +42,7 @@ mod tests {
                 int ba1 = 1;
                 int bb = 2;
                 bb = 1;
-                1[1] = \"cad\"[1]+1;
+                cc[1] = bb[1]+1;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);
@@ -60,8 +62,9 @@ mod tests {
             }
         "));
         let ast = parse(&mut lxr);
-        check_expr(ast);
-        println!("===========")
+        let mut symboltable = local_resolver(&ast);
+        println!("symboltable : {:?}", symboltable);
+        check_expr(&ast, &mut symboltable);
     }
 }
 

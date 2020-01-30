@@ -109,7 +109,7 @@ mod tests {
             }
         "));
         let ast = parse(&mut lxr);
-        let symboltable = local_resolver(ast);
+        let symboltable = local_resolver(&ast);
         println!("{:?}", build_type_graph(symboltable.global_define_map))
     }
 
@@ -155,7 +155,7 @@ mod tests {
             }
         "));
         let ast = parse(&mut lxr);
-        let symboltable = local_resolver(ast);
+        let symboltable = local_resolver(&ast);
         check_circle_def(symboltable.global_define_map);
     }
 
@@ -201,7 +201,7 @@ mod tests {
             }
         "));
         let ast = parse(&mut lxr);
-        let symboltable = local_resolver(ast);
+        let symboltable = local_resolver(&ast);
         println!("{:?}", symboltable.get_type(String::from("bb")));
     }
 }

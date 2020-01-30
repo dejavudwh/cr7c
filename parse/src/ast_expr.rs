@@ -3,12 +3,13 @@ use std::rc::Rc;
 use std::fmt;
 use crate::ast::TypeNode;
 use std::result::Result;
+use crate::symbol_table::TopLevelScope;
 
 pub trait ExprNode:fmt::Debug {
     fn is_leftvalue(&self) -> Result<(), String> {
         return Ok(())
     }
-    fn check_expr_validity(&self) {}
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {}
 }
 
 #[derive(Clone, Debug)]
@@ -21,14 +22,14 @@ pub struct AssginmentNode {
 }
 
 impl ExprNode for AssginmentNode {
-    fn check_expr_validity(&self) {
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
         let result = self.left_value.is_leftvalue();
         if result.is_err() {
             panic!(result.err().unwrap())
         }
 
-        self.left_value.check_expr_validity();
-        self.right_value.check_expr_validity();
+        self.left_value.check_expr_validity(scope);
+        self.right_value.check_expr_validity(scope);
     }
 }
 
@@ -43,9 +44,9 @@ pub struct ArithmeticOpNode {
 }
 
 impl ExprNode for ArithmeticOpNode {
-    fn check_expr_validity(&self) {
-        self.left_value.check_expr_validity();
-        self.right_value.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.left_value.check_expr_validity(&mut scope);
+        self.right_value.check_expr_validity(&mut scope);
     }
 }
 
@@ -63,8 +64,8 @@ impl ExprNode for TermNode {
         return self.unary.is_leftvalue()
     }
 
-    fn check_expr_validity(&self) {
-        self.unary.check_expr_validity();
+    fn check_expr_validity(&self, scope: &mut TopLevelScope) {
+        self.unary.check_expr_validity(scope);
     }
 }
 
@@ -72,7 +73,7 @@ pub trait UnaryNode:fmt::Debug {
     fn is_leftvalue(&self) -> Result<(), String> {
         return Ok(())
     }
-    fn check_expr_validity(&self) {}
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {}
 }
 
 #[derive(Clone, Debug)]
@@ -105,8 +106,8 @@ impl UnaryNode for SelfOpUnaryNode {
         return self.primary.is_leftvalue()
     }
 
-    fn check_expr_validity(&self) {
-        self.primary.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.primary.check_expr_validity(&mut scope);
     }
 }
 
@@ -125,8 +126,10 @@ impl UnaryNode for ArrayUnaryNode {
         return self.primary.is_leftvalue()
     }
 
-    fn check_expr_validity(&self) {
+    fn check_expr_validity(&self, scope: &mut TopLevelScope) {
         let literal = self.primary.get_type();
+        let var_type = scope.get_type(self.primary.get_name());
+        // println!("vat type === : {:?}", var_type);
         if literal != String::from("Identifier") {
             panic!(format!("\"{}\" Type! Cannot be referenced as an array", literal));
         }
@@ -148,8 +151,8 @@ impl UnaryNode for RefUnaryNode {
         return self.primary.is_leftvalue()
     }
     
-    fn check_expr_validity(&self) {
-        self.primary.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.primary.check_expr_validity(&mut scope);
     }
 }
 
@@ -168,8 +171,8 @@ impl UnaryNode for PointerRefUnaryNode {
         return self.primary.is_leftvalue()
     }
     
-    fn check_expr_validity(&self) {
-        self.primary.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.primary.check_expr_validity(&mut scope);
     }
 }
 
@@ -188,8 +191,8 @@ impl UnaryNode for FuncCallNode {
         return self.primary.is_leftvalue()
     }
     
-    fn check_expr_validity(&self) {
-        self.primary.check_expr_validity();
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        self.primary.check_expr_validity(&mut scope);
     }
 }
 
@@ -210,6 +213,14 @@ impl PrimaryNode {
             Const::String(value) => return String::from("String"),
             Const::Identifier => return String::from("Identifier"),
             Const::ParenthesesExpr(value) => return String::from("Expr"),
+        }
+    }
+
+    fn get_name(&self) -> String {
+        if let Some(name) = &self.name {
+            return name.clone()
+        } else {
+            panic!("Type error! {:?}", self.value);
         }
     }
 }
