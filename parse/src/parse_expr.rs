@@ -310,24 +310,24 @@ fn unary(mut lexer: &mut Lexer) -> Box<dyn UnaryNode> {
     let pn = primary(&mut lexer);
 
     if is_postfix_op(&lexer.lookahead(1)) {
-        println!("unary suffix {}", lexer.lookahead(1));
         match lexer.lookahead(1) {
-            Token::Dot => {
-                lexer.advance();
+            Token::Dot | Token::PointerRef => {
+                let op = lexer.advance();
                 return Box::new(RefUnaryNode {
                     prefix: t,
+                    operator: op,
                     primary: pn,
                     postfix: Some(Rc::new(unary(&mut lexer))),
                 })
             },
-            Token::PointerRef => {
-                lexer.advance();
-                return Box::new(PointerRefUnaryNode {
-                    prefix: t,
-                    primary: pn,
-                    postfix: Some(Rc::new(unary(&mut lexer))),
-                })
-            },
+            // Token::PointerRef => {
+            //     lexer.advance();
+            //     return Box::new(PointerRefUnaryNode {
+            //         prefix: t,
+            //         primary: pn,
+            //         postfix: Some(Rc::new(unary(&mut lexer))),
+            //     })
+            // },
             Token::Inc => {
                 return Box::new(SelfOpUnaryNode {
                     prefix: t,

@@ -4,6 +4,7 @@ use std::fmt;
 use crate::ast:: {
     TypeNode,
     DefStructNode,
+    TypeDef,
 };
 use std::result::Result;
 use crate::symbol_table:: {
@@ -84,6 +85,9 @@ pub trait UnaryNode:fmt::Debug {
     fn get_postfix(&self) -> &Option<Rc<Box<dyn UnaryNode>>> {
         return &None
     }
+    fn get_operator(&self) -> Option<Token> {
+        return None
+    }
     fn get_name(&self) -> String;
 }
 
@@ -103,6 +107,10 @@ impl UnaryNode for SingeUnaryNode {
 
     fn get_name(&self) -> String {
         return self.primary.get_name();
+    }
+
+    fn get_operator(&self) -> Option<Token> {
+        return None
     }
 }
 
@@ -168,6 +176,7 @@ pub struct RefUnaryNode {
         [prefix] primary [. unary]*
     */
     pub prefix: Option<Token>,
+    pub operator: Token,
     pub primary: PrimaryNode,
     pub postfix: Option<Rc<Box<dyn UnaryNode>>>,
 }
@@ -194,15 +203,28 @@ impl UnaryNode for RefUnaryNode {
     
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
         let name = self.primary.get_name();
-        println!("============ {}", name);
         let struct_type = scope.get_type(&name);
         let mut base_type = &struct_type.base_type;
         let mut member_list = &struct_type.origin_struct.clone().unwrap().member_list;
         let mut postfix = &self.postfix;
         loop {
             if let Some(unary) = postfix {
+                if let Some(op) = unary.get_operator() {
+                    if op == Token::PointerRef {
+                        let n = unary.get_name();
+                        for mem in member_list {
+                            if mem.name == n {
+                                let nested_def = &mem.typeref.nested_def;
+                                if nested_def.len() == 0 || *nested_def.last().unwrap() != TypeDef::Pointer {
+                                    panic!("Members of the \"{}\" should probably access through .", n);
+                                }
+                            }
+                        }
+                    }            
+                }
+
                 let mut names_type = HashMap::new();
-                let mem_name; 
+                let mem_name;
                 if *base_type == Token::Struct {
                     println!("vat type === : {:?}", struct_type);
                     let mut names = Vec::new();
@@ -242,6 +264,10 @@ impl UnaryNode for RefUnaryNode {
 
     fn get_postfix(&self) -> &Option<Rc<Box<dyn UnaryNode>>> {
         return &self.postfix
+    }
+
+    fn get_operator(&self) -> Option<Token> {
+        return Some(self.operator.clone());
     }
 }
 

@@ -38,12 +38,12 @@ mod tests {
             };
 
             int main(int argc,char **argv) {
-                struct teacher a;
+                struct headmaster a;
                 int ba1 = 1;
                 int[] bb = 2;
                 bb = 1;
                 bb[1] = bb[1]+1;
-                a.ss.sss.te.ss = 1;
+                a->sss.te->ss = 1;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);
@@ -64,6 +64,7 @@ mod tests {
             }
         "));
         let ast = parse(&mut lxr);
+        println!(" === {:?} ", ast);
         let mut symboltable = local_resolver(&ast);
         println!("symboltable : {:?}", symboltable);
         check_expr(&ast, &mut symboltable);
