@@ -5,6 +5,7 @@ use crate::ast:: {
     TypeNode,
     DefStructNode,
     TypeDef,
+    SlotNode,
 };
 use std::result::Result;
 use crate::symbol_table:: {
@@ -195,8 +196,31 @@ impl RefUnaryNode {
         return None
     }
 
-    fn check_access_op(&self) {
-
+    fn check_access_op(&self, option_op: &Option<Token>, name: String, member_list: &Vec<SlotNode>) {
+        if let Some(op) = option_op {
+            let n = name;
+            println!("======={:?} {:?}", op, member_list);
+            if *op == Token::PointerRef {
+                for mem in member_list {
+                    if mem.name == n {
+                        let nested_def = &mem.typeref.nested_def;
+                        if nested_def.len() == 0 || *nested_def.last().unwrap() != TypeDef::Pointer {
+                            panic!("Members of the \"{}\" should probably access through .", n);
+                        }
+                    }
+                }
+            } else {
+                for mem in member_list {
+                    println!("mem ======= {:?}", member_list);
+                    if mem.name == n {
+                        let nested_def = &mem.typeref.nested_def;
+                        if nested_def.len() != 0 {
+                            panic!("Members of the \"{}\" should probably access through ->", n);
+                        }
+                    }
+                }
+            }            
+        }
     }
 }
 
@@ -211,6 +235,7 @@ impl UnaryNode for RefUnaryNode {
         let mut base_type = &struct_type.base_type;
         let mut member_list = &struct_type.origin_struct.clone().unwrap().member_list;
         let mut postfix = &self.postfix;
+        self.check_access_op(&Some(self.operator.clone()), postfix.as_ref().unwrap().get_name(), &member_list);
         loop {
             if let Some(unary) = postfix {
                 let mut names_type = HashMap::new();
@@ -242,30 +267,8 @@ impl UnaryNode for RefUnaryNode {
                 } else {
                     break;
                 }
-
-                if let Some(op) = unary.get_operator() {
-                    let n = unary.get_postfix().as_ref().unwrap().get_name();
-                    if op == Token::PointerRef {
-                        for mem in member_list {
-                            if mem.name == n {
-                                let nested_def = &mem.typeref.nested_def;
-                                if nested_def.len() == 0 || *nested_def.last().unwrap() != TypeDef::Pointer {
-                                    panic!("Members of the \"{}\" should probably access through .", n);
-                                }
-                            }
-                        }
-                    } else {
-                        for mem in member_list {
-                            println!("mem ======= {:?}", member_list);
-                            if mem.name == n {
-                                let nested_def = &mem.typeref.nested_def;
-                                if nested_def.len() != 0 {
-                                    panic!("Members of the \"{}\" should probably access through ->", n);
-                                }
-                            }
-                        }
-                    }            
-                }
+                let name = unary.get_postfix().as_ref().unwrap().get_name();
+                self.check_access_op(&unary.get_operator(), name, &member_list);
             } else {
                 break;
             }        

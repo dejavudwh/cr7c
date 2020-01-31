@@ -43,7 +43,7 @@ mod tests {
                 int[] bb = 2;
                 bb = 1;
                 bb[1] = bb[1]+1;
-                a->ss->sss = 1;
+                a.ss.sss->name = 1;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);
