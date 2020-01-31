@@ -80,7 +80,7 @@ impl TopLevelScope {
         self.scope_stack.pop();
     }
 
-    pub fn get_type(&self, name: String) -> TypeInfo {
+    pub fn get_type(&self, name: &String) -> TypeInfo {
         let mut index = self.scope_stack.len();
         // println!("get type {:?} {:?}", index, self.scope_stack);
         loop {
@@ -88,12 +88,12 @@ impl TopLevelScope {
                 panic!("Can't find the symbol \"{}\"", name);
             }
             let local = &self.scope_stack[index - 1];
-            if let Some(node) = local.borrow_mut().var_map.get(&name) {
+            if let Some(node) = local.borrow_mut().var_map.get(&name.clone()) {
                 if node.typeref.type_base.base == Token::Struct {
                     let struct_name = node.typeref.type_base.name.as_ref().unwrap().clone();
                     let struct_type = self.global_define_map.get(&struct_name);
                     return TypeInfo {
-                        name,
+                        name: name.clone(),
                         origin_struct: Some(struct_type.unwrap().clone()),
                         origin_base: None,
                         base_type: Token::Struct,
@@ -101,7 +101,7 @@ impl TopLevelScope {
                     }
                 } else {
                     return TypeInfo {
-                        name,
+                        name: name.clone(),
                         origin_struct: None,
                         origin_base: Some(node.clone()),
                         base_type: node.typeref.type_base.base.clone(),

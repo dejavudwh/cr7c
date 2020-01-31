@@ -1,9 +1,16 @@
 use lex::token::Token;
 use std::rc::Rc;
 use std::fmt;
-use crate::ast::TypeNode;
+use crate::ast:: {
+    TypeNode,
+    DefStructNode,
+};
 use std::result::Result;
-use crate::symbol_table::TopLevelScope;
+use crate::symbol_table:: {
+    TopLevelScope,
+    TypeInfo,
+};
+use std::collections::HashMap;
 
 pub trait ExprNode:fmt::Debug {
     fn is_leftvalue(&self) -> Result<(), String> {
@@ -74,6 +81,10 @@ pub trait UnaryNode:fmt::Debug {
         return Ok(())
     }
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {}
+    fn get_postfix(&self) -> &Option<Rc<Box<dyn UnaryNode>>> {
+        return &None
+    }
+    fn get_name(&self) -> String;
 }
 
 #[derive(Clone, Debug)]
@@ -88,6 +99,10 @@ pub struct SingeUnaryNode {
 impl UnaryNode for SingeUnaryNode {
     fn is_leftvalue(&self) -> Result<(), String> {
         return self.primary.is_leftvalue()
+    }
+
+    fn get_name(&self) -> String {
+        return self.primary.get_name();
     }
 }
 
@@ -109,6 +124,10 @@ impl UnaryNode for SelfOpUnaryNode {
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
         self.primary.check_expr_validity(&mut scope);
     }
+
+    fn get_name(&self) -> String {
+        return self.primary.get_name();
+    }
 }
 
 #[derive(Debug)]
@@ -128,14 +147,18 @@ impl UnaryNode for ArrayUnaryNode {
 
     fn check_expr_validity(&self, scope: &mut TopLevelScope) {
         let literal = self.primary.get_type();
-        let var_type = scope.get_type(self.primary.get_name());
-        println!("vat type === : {:?}", var_type);
+        let name = self.primary.get_name();
+        let var_type = scope.get_type(&name);
         if var_type.nested_def.len() <= 0 {
-            panic!(format!("The identifier \"{}\" is not an array or a pointer", var_type.name));
+            panic!(format!("The identifier \"{}\" is not an array or a pointer", name));
         }
         if literal != String::from("Identifier") {
             panic!(format!("\"{}\" Type! Cannot be referenced as an array", literal));
         }
+    }
+
+    fn get_name(&self) -> String {
+        return self.primary.get_name();
     }
 }
 
@@ -149,13 +172,76 @@ pub struct RefUnaryNode {
     pub postfix: Option<Rc<Box<dyn UnaryNode>>>,
 }
 
+impl RefUnaryNode {
+    fn typename_from_typeinfo(&self, name: &String, type_info: &TypeInfo) -> Option<String> {
+        let struct_node = type_info.origin_struct.as_ref().unwrap();
+        for var in &struct_node.member_list {
+            let n = var.typeref.type_base.name.as_ref().unwrap();
+            println!("{:?} {:?}", n, name);
+            if n.as_str() == name.as_str() {
+                return Some(name.clone())
+            }
+        }
+
+        return None
+    }
+}
+
 impl UnaryNode for RefUnaryNode {
     fn is_leftvalue(&self) -> Result<(), String> {
         return self.primary.is_leftvalue()
     }
     
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
-        self.primary.check_expr_validity(&mut scope);
+        let name = self.primary.get_name();
+        println!("============ {}", name);
+        let struct_type = scope.get_type(&name);
+        let mut base_type = &struct_type.base_type;
+        let mut member_list = &struct_type.origin_struct.clone().unwrap().member_list;
+        let mut postfix = &self.postfix;
+        loop {
+            if let Some(unary) = postfix {
+                let mut names_type = HashMap::new();
+                let mem_name; 
+                if *base_type == Token::Struct {
+                    println!("vat type === : {:?}", struct_type);
+                    let mut names = Vec::new();
+                    for var in member_list {
+                        if let Some(t) = var.typeref.type_base.name.as_ref() {
+                            names_type.insert(var.name.clone(), t.clone());
+                        } else {
+                            names_type.insert(var.name.clone(), String::from(""));
+                        }
+                        names.push(var.name.clone());
+                    }
+                    let suffix = postfix.as_ref().unwrap();
+                    mem_name = suffix.get_name();
+                    if !names.contains(&mem_name) {
+                        panic!("{} has no members of \"{}\"", name, mem_name);
+                    }
+                } else {
+                    panic!("Type error! The identifier \"{}\" is not a struct", name);
+                }
+                postfix = &unary.get_postfix();
+                let mem = names_type.get(&mem_name).unwrap();
+                if let Some(name) = self.typename_from_typeinfo(mem, &struct_type) {
+                    member_list = &scope.global_define_map.get(&name).unwrap().member_list;
+                    base_type = &Token::Struct;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }        
+        }
+    }
+
+    fn get_name(&self) -> String {
+        return self.primary.get_name();
+    }
+
+    fn get_postfix(&self) -> &Option<Rc<Box<dyn UnaryNode>>> {
+        return &self.postfix
     }
 }
 
@@ -177,6 +263,10 @@ impl UnaryNode for PointerRefUnaryNode {
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
         self.primary.check_expr_validity(&mut scope);
     }
+
+    fn get_name(&self) -> String {
+        return self.primary.get_name();
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -196,6 +286,10 @@ impl UnaryNode for FuncCallNode {
     
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
         self.primary.check_expr_validity(&mut scope);
+    }
+
+    fn get_name(&self) -> String {
+        return self.primary.get_name();
     }
 }
 
@@ -218,14 +312,6 @@ impl PrimaryNode {
             Const::ParenthesesExpr(value) => return String::from("Expr"),
         }
     }
-
-    fn get_name(&self) -> String {
-        if let Some(name) = &self.name {
-            return name.clone()
-        } else {
-            panic!("Type error! {:?}", self.value);
-        }
-    }
 }
 
 impl UnaryNode for PrimaryNode {
@@ -236,6 +322,14 @@ impl UnaryNode for PrimaryNode {
             Const::Char(value) => Err(format!("Unexpect an left value: {}", value)),
             Const::String(value) => Err(format!("Unexpect an left value: {}", value)),
             Const::ParenthesesExpr(value) => Err(format!("Unexpect an left value: {:?}", value)),
+        }
+    }
+
+    fn get_name(&self) -> String {
+        if let Some(name) = &self.name {
+            return name.clone()
+        } else {
+            panic!("Type error! {:?}", self.value);
         }
     }
 }

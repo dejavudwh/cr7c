@@ -42,7 +42,8 @@ mod tests {
                 int ba1 = 1;
                 int[] bb = 2;
                 bb = 1;
-                bb[1] = ba1[1]+1;
+                bb[1] = bb[1]+1;
+                a.ss.sss.te.ss = 1;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);

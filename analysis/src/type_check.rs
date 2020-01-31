@@ -202,6 +202,6 @@ mod tests {
         "));
         let ast = parse(&mut lxr);
         let symboltable = local_resolver(&ast);
-        println!("{:?}", symboltable.get_type(String::from("bb")));
+        println!("{:?}", symboltable.get_type(&String::from("bb")));
     }
 }

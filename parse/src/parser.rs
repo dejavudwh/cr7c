@@ -53,6 +53,7 @@ mod tests {
             int main(int argc,char **argv) {
                 struct class a;
                 int a1 = 1;
+                zxc.vas.cvc = 1;
                 &a;
                 calc();
                 for(i = 0; i < 10; i++) {
