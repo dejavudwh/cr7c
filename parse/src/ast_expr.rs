@@ -194,6 +194,10 @@ impl RefUnaryNode {
 
         return None
     }
+
+    fn check_access_op(&self) {
+
+    }
 }
 
 impl UnaryNode for RefUnaryNode {
@@ -209,20 +213,6 @@ impl UnaryNode for RefUnaryNode {
         let mut postfix = &self.postfix;
         loop {
             if let Some(unary) = postfix {
-                if let Some(op) = unary.get_operator() {
-                    if op == Token::PointerRef {
-                        let n = unary.get_name();
-                        for mem in member_list {
-                            if mem.name == n {
-                                let nested_def = &mem.typeref.nested_def;
-                                if nested_def.len() == 0 || *nested_def.last().unwrap() != TypeDef::Pointer {
-                                    panic!("Members of the \"{}\" should probably access through .", n);
-                                }
-                            }
-                        }
-                    }            
-                }
-
                 let mut names_type = HashMap::new();
                 let mem_name;
                 if *base_type == Token::Struct {
@@ -251,6 +241,30 @@ impl UnaryNode for RefUnaryNode {
                     base_type = &Token::Struct;
                 } else {
                     break;
+                }
+
+                if let Some(op) = unary.get_operator() {
+                    let n = unary.get_postfix().as_ref().unwrap().get_name();
+                    if op == Token::PointerRef {
+                        for mem in member_list {
+                            if mem.name == n {
+                                let nested_def = &mem.typeref.nested_def;
+                                if nested_def.len() == 0 || *nested_def.last().unwrap() != TypeDef::Pointer {
+                                    panic!("Members of the \"{}\" should probably access through .", n);
+                                }
+                            }
+                        }
+                    } else {
+                        for mem in member_list {
+                            println!("mem ======= {:?}", member_list);
+                            if mem.name == n {
+                                let nested_def = &mem.typeref.nested_def;
+                                if nested_def.len() != 0 {
+                                    panic!("Members of the \"{}\" should probably access through ->", n);
+                                }
+                            }
+                        }
+                    }            
                 }
             } else {
                 break;
