@@ -198,8 +198,7 @@ impl RefUnaryNode {
 
     fn check_access_op(&self, option_op: &Option<Token>, name: String, member_list: &Vec<SlotNode>) {
         if let Some(op) = option_op {
-            let n = name;
-            println!("======={:?} {:?}", op, member_list);
+            let n = name.clone();
             if *op == Token::PointerRef {
                 for mem in member_list {
                     if mem.name == n {
@@ -211,7 +210,6 @@ impl RefUnaryNode {
                 }
             } else {
                 for mem in member_list {
-                    println!("mem ======= {:?}", member_list);
                     if mem.name == n {
                         let nested_def = &mem.typeref.nested_def;
                         if nested_def.len() != 0 {
@@ -230,18 +228,17 @@ impl UnaryNode for RefUnaryNode {
     }
     
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
-        let name = self.primary.get_name();
+        let mut name = self.primary.get_name().clone();
         let struct_type = scope.get_type(&name);
         let mut base_type = &struct_type.base_type;
         let mut member_list = &struct_type.origin_struct.clone().unwrap().member_list;
         let mut postfix = &self.postfix;
-        self.check_access_op(&Some(self.operator.clone()), postfix.as_ref().unwrap().get_name(), &member_list);
+        self.check_access_op(&Some(self.operator.clone()), name.clone(), &member_list);
         loop {
             if let Some(unary) = postfix {
                 let mut names_type = HashMap::new();
                 let mem_name;
                 if *base_type == Token::Struct {
-                    println!("vat type === : {:?}", struct_type);
                     let mut names = Vec::new();
                     for var in member_list {
                         if let Some(t) = var.typeref.type_base.name.as_ref() {
@@ -259,16 +256,16 @@ impl UnaryNode for RefUnaryNode {
                 } else {
                     panic!("Type error! The identifier \"{}\" is not a struct", name);
                 }
+                name = unary.get_name();
+                self.check_access_op(&unary.get_operator(), name.clone(), &member_list);
                 postfix = &unary.get_postfix();
                 let mem = names_type.get(&mem_name).unwrap();
-                if let Some(name) = self.typename_from_typeinfo(mem, &struct_type) {
-                    member_list = &scope.global_define_map.get(&name).unwrap().member_list;
+                if let Some(_type) = &scope.global_define_map.get(mem) { 
+                    member_list = &_type.member_list;
                     base_type = &Token::Struct;
                 } else {
                     break;
                 }
-                let name = unary.get_postfix().as_ref().unwrap().get_name();
-                self.check_access_op(&unary.get_operator(), name, &member_list);
             } else {
                 break;
             }        
