@@ -38,14 +38,13 @@ mod tests {
             };
 
             int main(int argc,char **argv) {
-                struct teacher a;
+                struct student a;
                 int ba1 = 1;
                 int[] bb = 2;
                 bb = 1;
                 bb[1] = bb[1]+1;
-                (int)a.ss.sss.te->ss.sss.name = 1;
+                a.name = 1;
                 &a;
-                1++;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
                     a = 1 * 2 << 3 && 4 + 5 / 6 + calc(a);

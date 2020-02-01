@@ -19,6 +19,9 @@ pub trait ExprNode:fmt::Debug {
         return Ok(())
     }
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {}
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        return None
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -39,6 +42,8 @@ impl ExprNode for AssginmentNode {
 
         self.left_value.check_expr_validity(scope);
         self.right_value.check_expr_validity(scope);
+
+        println!("===check type==={:?}", self.left_value.get_type(&mut scope));
     }
 }
 
@@ -76,6 +81,10 @@ impl ExprNode for TermNode {
     fn check_expr_validity(&self, scope: &mut TopLevelScope) {
         self.unary.check_expr_validity(scope);
     }
+
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        return self.unary.get_type(&mut scope);
+    }
 }
 
 pub trait UnaryNode:fmt::Debug {
@@ -103,6 +112,10 @@ pub trait UnaryNode:fmt::Debug {
     }
 
     fn get_operator(&self) -> Option<Token> {
+        return None
+    }
+
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
         return None
     }
 
@@ -134,6 +147,13 @@ impl UnaryNode for SingeUnaryNode {
 
     fn get_prefix(&self) -> Option<Token> {
         return self.prefix.clone()
+    }
+
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        let name = self.primary.get_name();
+        let t = scope.get_type(&name);
+
+        return Some(t)
     }
 }
 
@@ -300,6 +320,46 @@ impl UnaryNode for RefUnaryNode {
                 break;
             }        
         }
+    }
+
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        let name = self.primary.get_name();
+        let struct_type = scope.get_type(&name);
+        let mut member_list = &struct_type.origin_struct.clone().unwrap().member_list;    
+        let mut postfix = self.get_postfix();
+        loop {
+            if let Some(unary) = postfix {
+                let mem_name = unary.get_name();
+                for mem in member_list {
+                    if mem_name == mem.name {
+                        let type_base = &mem.typeref.type_base;
+                        if let Some(name) = &type_base.name {
+                            return Some(TypeInfo {
+                                name: mem_name.clone(),
+                                origin_struct: Some(scope.global_define_map.get(&name.clone()).unwrap().clone()),
+                                origin_base: None,
+                                base_type: type_base.base.clone(),
+                                nested_def: mem.typeref.nested_def.clone(),
+                            })
+                        } else {
+                            return Some(TypeInfo {
+                                name: mem_name.clone(),
+                                origin_struct: None,
+                                origin_base: None,
+                                base_type: type_base.base.clone(),
+                                nested_def: mem.typeref.nested_def.clone(),
+                            })
+                        }
+                    }
+                }
+                postfix = unary.get_postfix();
+            } else {
+                break;
+            }
+
+        }
+
+        return None
     }
 
     fn get_name(&self) -> String {
