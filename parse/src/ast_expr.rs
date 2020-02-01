@@ -82,14 +82,32 @@ pub trait UnaryNode:fmt::Debug {
     fn is_leftvalue(&self) -> Result<(), String> {
         return Ok(())
     }
-    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {}
+
+    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
+        if let Some(prefix) = self.get_prefix() {
+            match prefix {
+                Token::Inc |
+                Token::Dec |
+                Token::Mul |
+                Token::Bitand |
+                Token::Not => {
+                    self.get_name();
+                },
+                _ => {}
+            }
+        }
+    }
+
     fn get_postfix(&self) -> &Option<Rc<Box<dyn UnaryNode>>> {
         return &None
     }
+
     fn get_operator(&self) -> Option<Token> {
         return None
     }
+
     fn get_name(&self) -> String;
+    fn get_prefix(&self) -> Option<Token>;
 }
 
 #[derive(Clone, Debug)]
@@ -113,6 +131,10 @@ impl UnaryNode for SingeUnaryNode {
     fn get_operator(&self) -> Option<Token> {
         return None
     }
+
+    fn get_prefix(&self) -> Option<Token> {
+        return self.prefix.clone()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -131,11 +153,28 @@ impl UnaryNode for SelfOpUnaryNode {
     }
 
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
-        self.primary.check_expr_validity(&mut scope);
+        if let Some(prefix) = self.get_prefix() {
+            match prefix {
+                Token::Inc |
+                Token::Dec |
+                Token::Mul |
+                Token::Bitand |
+                Token::Not => {
+                    self.get_name();
+                },
+                _ => {}
+            }
+        }
+
+        self.get_name();
     }
 
     fn get_name(&self) -> String {
         return self.primary.get_name();
+    }
+
+    fn get_prefix(&self) -> Option<Token> {
+        return self.prefix.clone()
     }
 }
 
@@ -169,6 +208,10 @@ impl UnaryNode for ArrayUnaryNode {
     fn get_name(&self) -> String {
         return self.primary.get_name();
     }
+
+    fn get_prefix(&self) -> Option<Token> {
+        return self.prefix.clone()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -183,19 +226,6 @@ pub struct RefUnaryNode {
 }
 
 impl RefUnaryNode {
-    fn typename_from_typeinfo(&self, name: &String, type_info: &TypeInfo) -> Option<String> {
-        let struct_node = type_info.origin_struct.as_ref().unwrap();
-        for var in &struct_node.member_list {
-            let n = var.typeref.type_base.name.as_ref().unwrap();
-            println!("{:?} {:?}", n, name);
-            if n.as_str() == name.as_str() {
-                return Some(name.clone())
-            }
-        }
-
-        return None
-    }
-
     fn check_access_op(&self, option_op: &Option<Token>, name: String, member_list: &Vec<SlotNode>) {
         if let Some(op) = option_op {
             let n = name.clone();
@@ -283,6 +313,10 @@ impl UnaryNode for RefUnaryNode {
     fn get_operator(&self) -> Option<Token> {
         return Some(self.operator.clone());
     }
+
+    fn get_prefix(&self) -> Option<Token> {
+        return self.prefix.clone()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -300,12 +334,12 @@ impl UnaryNode for PointerRefUnaryNode {
         return self.primary.is_leftvalue()
     }
     
-    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
-        self.primary.check_expr_validity(&mut scope);
-    }
-
     fn get_name(&self) -> String {
         return self.primary.get_name();
+    }
+
+    fn get_prefix(&self) -> Option<Token> {
+        return self.prefix.clone()
     }
 }
 
@@ -323,13 +357,13 @@ impl UnaryNode for FuncCallNode {
     fn is_leftvalue(&self) -> Result<(), String> {
         return self.primary.is_leftvalue()
     }
-    
-    fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
-        self.primary.check_expr_validity(&mut scope);
-    }
 
     fn get_name(&self) -> String {
         return self.primary.get_name();
+    }
+
+    fn get_prefix(&self) -> Option<Token> {
+        return self.prefix.clone()
     }
 }
 
@@ -369,8 +403,12 @@ impl UnaryNode for PrimaryNode {
         if let Some(name) = &self.name {
             return name.clone()
         } else {
-            panic!("Type error! {:?}", self.value);
+            panic!("Type error! {:?}, Expect an left value", self.value);
         }
+    }
+
+    fn get_prefix(&self) -> Option<Token> {
+        return None
     }
 }
 
