@@ -14,6 +14,34 @@ use crate::symbol_table:: {
 };
 use std::collections::HashMap;
 
+fn check_type_compatible(left_type: (Token, Vec<TypeDef>), right_type: (Token, Vec<TypeDef>)) {
+    if left_type.0 != right_type.0 {
+        panic!("{} and {} types are incompatible", left_type.0, right_type.0);
+    }
+
+    let l_len = left_type.1.len();
+    let r_len = right_type.1.len();
+
+    if l_len == 0 && r_len == 0 {
+        return
+    }
+
+
+    if let Some(l_last_type) = &left_type.1.last() {
+        if let Some(r_last_type) = &right_type.1.last() {
+            if **l_last_type == TypeDef::Array || **l_last_type == TypeDef::Pointer {
+                if **r_last_type != TypeDef::Array && **r_last_type != TypeDef::Pointer {
+                    panic!("{} and {} types are incompatible", left_type.0, right_type.0);
+                }
+            }
+        } else {
+            panic!("{:?} and {:?} types are incompatible", left_type.1, right_type.1);
+        }
+    } else {
+        panic!("{:?} and {:?} types are incompatible", left_type.1, right_type.1);
+    }
+}
+
 pub trait ExprNode:fmt::Debug {
     fn is_leftvalue(&self) -> Result<(), String> {
         return Ok(())
@@ -34,9 +62,31 @@ pub struct AssginmentNode {
 }
 
 impl AssginmentNode {
-    fn check_type(&self, left_type: Option<TypeInfo>, right_type: Option<TypeInfo>) {
+    /**
+     *  赋值的类型检查
+     *  首先左值的有效性之前就检查过了，所以这里可以确保左值有效
+     *  把初始化的类型检查放到这来，也就是先检查Defvarnode里的
+     */
+    fn check_type(&self, left_type: Option<TypeInfo>, right_type: Option<TypeInfo>, mut scope: &mut TopLevelScope) {
+        // 初始化的类型检查
+        self.check_init_type(&left_type, &mut scope);
+
         println!("==========={:?}", left_type);
         println!("==========={:?}", right_type);
+    }
+
+    fn check_init_type(&self, value: &Option<TypeInfo>, mut scope: &mut TopLevelScope) {
+        if let Some(info) = value {
+            if let Some(var) = &info.origin_base {
+                let left = (var.typeref.type_base.base.clone(), var.typeref.nested_def.clone());
+                let value = var.name_map.get(&info.name);
+                if let Some(expr) = value.unwrap() {
+                    let type_info = expr.get_type(&mut scope).unwrap();
+                    let right = (type_info.base_type.clone(), type_info.nested_def.clone());
+                    check_type_compatible(left, right);
+                }
+            }
+        }
     }
 }
 
@@ -52,7 +102,7 @@ impl ExprNode for AssginmentNode {
 
         let left = self.left_value.get_type(&mut scope);
         let right = self.right_value.get_type(&mut scope);
-        self.check_type(left, right);
+        self.check_type(left, right, &mut scope);
     }
 }
 
@@ -243,6 +293,12 @@ impl UnaryNode for ArrayUnaryNode {
         } else {
             panic!(format!("\"{}\" Type! Cannot be referenced as an array", name));
         }
+    }
+
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        let name = self.primary.get_name();
+        let t = scope.get_type(&name);
+        return Some(t)
     }
 
     fn get_name(&self) -> String {

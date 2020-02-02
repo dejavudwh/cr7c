@@ -1,5 +1,8 @@
 use std::collections::HashMap;
-use parse::ast::ProgramNode;
+use parse::ast:: {
+    ProgramNode,
+    TypeDef,
+};
 use lex::token::Token;
 use parse::parser::parse;
 use lex::lexer::Lexer;
@@ -40,10 +43,11 @@ mod tests {
             int main(int argc,char **argv) {
                 struct student a;
                 int ba1 = 1;
-                int[] bb = 2;
-                bb = 1;
+                int[] aa;
+                int[] bb = aa;
+                bb = 'p';
                 bb[1] = bb[1]+1;
-                a = 1;
+                a.age = 1;
                 &a;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
