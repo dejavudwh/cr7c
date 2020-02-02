@@ -33,6 +33,13 @@ pub struct AssginmentNode {
     pub right_value: Rc<Box<dyn ExprNode>>,
 }
 
+impl AssginmentNode {
+    fn check_type(&self, left_type: Option<TypeInfo>, right_type: Option<TypeInfo>) {
+        println!("==========={:?}", left_type);
+        println!("==========={:?}", right_type);
+    }
+}
+
 impl ExprNode for AssginmentNode {
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
         let result = self.left_value.is_leftvalue();
@@ -43,7 +50,9 @@ impl ExprNode for AssginmentNode {
         self.left_value.check_expr_validity(scope);
         self.right_value.check_expr_validity(scope);
 
-        println!("===check type==={:?}", self.left_value.get_type(&mut scope));
+        let left = self.left_value.get_type(&mut scope);
+        let right = self.right_value.get_type(&mut scope);
+        self.check_type(left, right);
     }
 }
 
@@ -150,10 +159,19 @@ impl UnaryNode for SingeUnaryNode {
     }
 
     fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
-        let name = self.primary.get_name();
-        let t = scope.get_type(&name);
-
-        return Some(t)
+        let token = self.primary.get_primary_type();
+        if let Token::Name(n) = token {
+            let t = scope.get_type(&n);
+            return Some(t)
+        } else {
+            return Some(TypeInfo {
+                name: String::from("none"),
+                origin_struct: None,
+                origin_base: None,
+                base_type: token,
+                nested_def: Vec::new(),
+            })
+        }
     }
 }
 
@@ -214,14 +232,16 @@ impl UnaryNode for ArrayUnaryNode {
     }
 
     fn check_expr_validity(&self, scope: &mut TopLevelScope) {
-        let literal = self.primary.get_type();
-        let name = self.primary.get_name();
+        let literal = self.primary.get_primary_type();
+        let mut name = self.primary.get_name();
         let var_type = scope.get_type(&name);
         if var_type.nested_def.len() <= 0 {
             panic!(format!("The identifier \"{}\" is not an array or a pointer", name));
         }
-        if literal != String::from("Identifier") {
-            panic!(format!("\"{}\" Type! Cannot be referenced as an array", literal));
+        if let Token::Name(n) = literal {
+            name = n;
+        } else {
+            panic!(format!("\"{}\" Type! Cannot be referenced as an array", name));
         }
     }
 
@@ -358,7 +378,6 @@ impl UnaryNode for RefUnaryNode {
             }
 
         }
-
         return None
     }
 
@@ -437,13 +456,13 @@ pub struct PrimaryNode {
 }
 
 impl PrimaryNode {
-    fn get_type(&self) -> String {
+    fn get_primary_type(&self) -> Token {
         match &self.value {
-            Const::Integer(value) => return String::from("Integer"),
-            Const::Char(value) => return String::from("Char"),
-            Const::String(value) => return String::from("String"),
-            Const::Identifier => return String::from("Identifier"),
-            Const::ParenthesesExpr(value) => return String::from("Expr"),
+            Const::Integer(value) => return Token::Int,
+            Const::Char(value) => return Token::Char,
+            Const::String(value) => return Token::String(String::from(value)),
+            Const::Identifier => return Token::Name(String::from(self.name.as_ref().unwrap().clone())),
+            Const::ParenthesesExpr(value) => return Token::LParentheses,
         }
     }
 }

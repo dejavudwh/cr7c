@@ -43,7 +43,7 @@ mod tests {
                 int[] bb = 2;
                 bb = 1;
                 bb[1] = bb[1]+1;
-                a.name = 1;
+                a = 1;
                 &a;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
