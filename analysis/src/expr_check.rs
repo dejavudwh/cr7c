@@ -44,7 +44,7 @@ mod tests {
                 struct student a;
                 int ba1 = 1;
                 int[] aa;
-                int[] bb = aa;
+                int[10] bb = aa;
                 bb = 'p';
                 bb[1] = bb[1]+1;
                 a.age = 1;

@@ -149,6 +149,7 @@ pub fn typeref(mut lexer: &mut Lexer) -> TypeNode {
                         nested_def.push(TypeDef::Array);
                     },
                     Token::Number(n) => {
+                        lexer.advance();
                         nested_def.push(TypeDef::FixedArray(n as usize));
                     },
                     _ => panic!("unexcept token! {}", t)
