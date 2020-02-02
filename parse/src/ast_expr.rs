@@ -120,10 +120,28 @@ pub struct ArithmeticOpNode {
     pub right_value: Rc<Box<dyn ExprNode>>,
 }
 
+impl ArithmeticOpNode {
+    fn check_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        let right = self.right_value.get_type(&mut scope);
+        let left = self.left_value.get_type(&mut scope);
+
+        let left_type = (left.as_ref().unwrap().base_type.clone(), left.as_ref().unwrap().nested_def.clone());
+        let right_type = (right.as_ref().unwrap().base_type.clone(), right.as_ref().unwrap().nested_def.clone());
+
+        check_type_compatible(left_type, right_type);
+
+        return left
+    }
+}
+
 impl ExprNode for ArithmeticOpNode {
     fn check_expr_validity(&self, mut scope: &mut TopLevelScope) {
         self.left_value.check_expr_validity(&mut scope);
         self.right_value.check_expr_validity(&mut scope);
+    }
+
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        return self.check_type(&mut scope)
     }
 }
 

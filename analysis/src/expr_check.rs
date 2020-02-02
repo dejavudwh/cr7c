@@ -45,8 +45,8 @@ mod tests {
                 int ba1 = 1;
                 int[] aa;
                 int[10] bb = aa;
-                bb[1] = 1;
-                a.age = calc(a);
+                bb[ba1] = 1 * 2 << 3 && 4 + 5 / 6 + calc();
+                a.age = 2 + calc(a);
                 &a;
                 for(i = 0; i < 10; i++) {
                     int ca = 1;
