@@ -73,6 +73,10 @@ impl AssginmentNode {
 
         println!("==========={:?}", left_type);
         println!("==========={:?}", right_type);
+
+        let left = (left_type.as_ref().unwrap().base_type.clone(), left_type.as_ref().unwrap().nested_def.clone());
+        let right = (right_type.as_ref().unwrap().base_type.clone(), right_type.as_ref().unwrap().nested_def.clone());
+        check_type_compatible(left, right);
     }
 
     fn check_init_type(&self, value: &Option<TypeInfo>, mut scope: &mut TopLevelScope) {
@@ -264,6 +268,22 @@ impl UnaryNode for SelfOpUnaryNode {
     fn get_prefix(&self) -> Option<Token> {
         return self.prefix.clone()
     }
+
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        let token = self.primary.get_primary_type();
+        if let Token::Name(n) = token {
+            let t = scope.get_type(&n);
+            return Some(t)
+        } else {
+            return Some(TypeInfo {
+                name: String::from("none"),
+                origin_struct: None,
+                origin_base: None,
+                base_type: token,
+                nested_def: Vec::new(),
+            })
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -298,7 +318,14 @@ impl UnaryNode for ArrayUnaryNode {
     fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
         let name = self.primary.get_name();
         let t = scope.get_type(&name);
-        return Some(t)
+        // 这里返回的是每个元素的类型
+        return Some(TypeInfo {
+            name: String::from("none"),
+            origin_struct: None,
+            origin_base: None,
+            base_type: t.base_type.clone(),
+            nested_def: Vec::new(),
+        })
     }
 
     fn get_name(&self) -> String {
@@ -499,6 +526,19 @@ impl UnaryNode for FuncCallNode {
 
     fn get_prefix(&self) -> Option<Token> {
         return self.prefix.clone()
+    }
+
+    fn get_type(&self, mut scope: &mut TopLevelScope) -> Option<TypeInfo> {
+        let name = self.primary.get_name();
+        let func = scope.func_map.get(&name);
+
+        return Some(TypeInfo {
+            name: name.clone(),
+            origin_struct: None,
+            origin_base: None,
+            base_type: func.unwrap().typeref.type_base.base.clone(),
+            nested_def: func.unwrap().typeref.nested_def.clone(),
+        }) 
     }
 }
 
