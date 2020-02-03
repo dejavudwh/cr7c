@@ -8,9 +8,12 @@ edition = "2018"
 members = [
     "lex",
     "parse",
+    "analysis",
+    "ir",
 ]
 
 [dependencies]
 lex = { path = "./lex" }
-parse = {path = "./parse"}
-analysis = {path = "./analysis"}
+parse = { path = "./parse" }
+analysis = { path = "./analysis" }
+ir = { path = "./ir" }

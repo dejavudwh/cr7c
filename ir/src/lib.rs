@@ -1,1 +1,1 @@
-mod ir
+mod generate;

@@ -1,15 +1,21 @@
-use parse::ast::DefVarNode;
+use crate::ast:: {
+    DefVarNode,
+    DefFuncNode,
+};
+use std::rc::Rc;
+use std::fmt;
 
-pub trait IRNode {
+pub trait IRNode:fmt::Debug {
 
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct IR {
-
+    pub variables: Vec<DefVarNode>,
+    pub functions: Vec<DefFuncNode>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Assign {
     pub lhs: ExprStmt,
     pub rhs: ExprStmt,
@@ -17,7 +23,7 @@ pub struct Assign {
 
 impl IRNode for Assign {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct CJump {
     pub cond: ExprStmt,
     pub thenLabel: LabelStmt,
@@ -40,21 +46,21 @@ pub struct LabelStmt {
 
 impl IRNode for LabelStmt {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct ExprStmt {
-    pub expr: Box<dyn IRNode>,
+    pub expr: Rc<Box<dyn IRNode>>,
 }
 
 impl IRNode for ExprStmt {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Return {
-    pub expr: Box<dyn IRNode>,
+    pub expr: Rc<Box<dyn IRNode>>,
 }
 
 impl IRNode for Return {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Uni {
     pub op: Op,
     pub expr: ExprStmt,
@@ -62,7 +68,7 @@ pub struct Uni {
 
 impl IRNode for Uni {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Bin {
     pub op: Op,
     pub left: ExprStmt,
@@ -71,7 +77,7 @@ pub struct Bin {
 
 impl IRNode for Bin {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Call {
     pub expr: ExprStmt,
     pub args: Vec<ExprStmt>,
@@ -79,21 +85,21 @@ pub struct Call {
 
 impl IRNode for Call {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Addr {
     pub expr: ExprStmt,
 }
 
 impl IRNode for Addr {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Mem {
     pub expr: ExprStmt,
 }
 
 impl IRNode for Mem {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Var {
     pub expr: DefVarNode,
 }
@@ -107,6 +113,7 @@ pub struct Int {
 
 impl IRNode for Int {}
 
+#[derive(Clone, Debug, PartialEq)]
 pub enum Op {
     ADD,
     SUB,
@@ -123,7 +130,7 @@ pub enum Op {
     GT,
     GTEQ,
     LT,
-    LTEQ
+    LTEQ,
     NOT,
     CAST,
 }
