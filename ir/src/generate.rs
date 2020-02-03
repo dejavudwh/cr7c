@@ -3,11 +3,29 @@ use parse::ast:: {
     ProgramNode,
     TypeDef,
 };
+use parse::ir:: {
+    IRNode,
+    IR,
+};
 use lex::token::Token;
 use parse::parser::parse;
 use lex::lexer::Lexer;
 use parse::symbol_table::TopLevelScope;
-use crate::local_resolver::local_resolver;
+use analysis::local_resolver::local_resolver;
+use analysis::expr_check::check_expr;
+
+fn ir_generate(ast: ProgramNode) -> IR {
+    let funcs = ast.defs.func_defs;
+
+    let ir_tree = IR {
+        variables: Vec::new(),
+        functions: Vec::new(),
+    }
+
+    for func in funcs {
+        func.generate(&mut ir_tree);
+    }
+}
 
 #[cfg(test)]
 mod tests {

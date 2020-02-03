@@ -6,4 +6,3 @@ mod ast_stmt;
 mod parse_def;
 mod parse_expr;
 mod parse_stmt;
-mod ir;

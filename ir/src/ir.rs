@@ -1,6 +1,7 @@
 use crate::ast:: {
     DefVarNode,
     DefFuncNode,
+    TypeNode,
 };
 use std::rc::Rc;
 use std::fmt;
@@ -12,8 +13,20 @@ pub trait IRNode:fmt::Debug {
 #[derive(Clone, Debug)]
 pub struct IR {
     pub variables: Vec<DefVarNode>,
-    pub functions: Vec<DefFuncNode>,
+    pub functions: Vec<Func>,
 }
+
+impl IRNode for IR {}
+
+#[derive(Clone, Debug)]
+pub struct Func {
+    pub origin: DefFuncNode,
+    pub name: String,
+    pub return_type: TypeNode,
+    pub body: Vec<Rc<Box<dyn IRNode>>>,
+}
+
+impl IRNode for Func {}
 
 #[derive(Clone, Debug)]
 pub struct Assign {
@@ -26,8 +39,8 @@ impl IRNode for Assign {}
 #[derive(Clone, Debug)]
 pub struct CJump {
     pub cond: ExprStmt,
-    pub thenLabel: LabelStmt,
-    pub elseLabel: LabelStmt,
+    pub then_label: LabelStmt,
+    pub else_label: LabelStmt,
 }
 
 impl IRNode for CJump {}

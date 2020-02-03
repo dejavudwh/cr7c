@@ -1,3 +1,3 @@
-mod local_resolver;
-mod type_def_check;
-mod expr_check;
+pub mod local_resolver;
+pub mod type_def_check;
+pub mod expr_check;

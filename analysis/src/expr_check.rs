@@ -9,7 +9,7 @@ use lex::lexer::Lexer;
 use parse::symbol_table::TopLevelScope;
 use crate::local_resolver::local_resolver;
 
-fn check_expr(ast: &ProgramNode, mut symboltable: &mut TopLevelScope) {
+pub fn check_expr(ast: &ProgramNode, mut symboltable: &mut TopLevelScope) {
     let funcs = &ast.defs.func_defs;
 
     for func in funcs {
