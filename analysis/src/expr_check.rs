@@ -27,17 +27,17 @@ mod tests {
             struct student {
                 char[] name;
                 int age;
-                int sex;
-                struct teacher *te;
+                int gender;
+                struct teacher *t;
             };
 
             struct teacher {
-                struct headmaster ss;
+                struct student[] s;
+                struct headmaster *hm;
             };
 
             struct headmaster {
-                struct student sss;
-                struct teacher *s;
+                struct teacher[] s;
             };
 
             int main(int argc,char **argv) {
@@ -45,7 +45,7 @@ mod tests {
                 int ba1 = 1;
                 int[] aa;
                 int[10] bb = aa;
-                bb[ba1] = 1 * 2 << 3 && 4 + 5 / 6 + calc();
+                bb[ba1] = 1 * 2 << 3 && 4 + 5 / 6 + calc(2);
                 a.age = 2 + calc(a);
                 &a;
                 for(i = 0; i < 10; i++) {
